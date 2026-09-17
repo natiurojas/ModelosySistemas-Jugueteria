@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+
+    android:layout_width="match_parent"
+    android:layout_height="62dp"
+
+    android:orientation="horizontal"
+
+    android:gravity="center_vertical"
+
+    android:paddingStart="17dp"
+    android:paddingEnd="17dp">
+
+
+    <!-- Producto -->
+
+    <LinearLayout
+
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+
+        android:layout_weight="1"
+
+        android:orientation="vertical">
+
+
+        <TextView
+            android:id="@+id/txtProductName"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Osito de Peluche"
+
+            android:textColor="#27344A"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+
+        <TextView
+            android:id="@+id/txtQuantity"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:layout_marginTop="3dp"
+
+            android:text="1 unidad"
+
+            android:textColor="#888888"
+            android:textSize="11sp" />
+
+    </LinearLayout>
+
+
+    <!-- Precio unitario -->
+
+    <TextView
+        android:id="@+id/txtUnitPrice"
+
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+
+        android:gravity="center"
+
+        android:text="$ 5.400"
+
+        android:textColor="#777777"
+        android:textSize="11sp" />
+
+
+    <!-- Subtotal -->
+
+    <TextView
+        android:id="@+id/txtSubtotal"
+
+        android:layout_width="85dp"
+        android:layout_height="wrap_content"
+
+        android:gravity="end"
+
+        android:text="$ 5.400"
+
+        android:textColor="#27344A"
+        android:textSize="13sp"
+        android:textStyle="bold" />
+
+</LinearLayout>

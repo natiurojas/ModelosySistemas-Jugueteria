@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "1091578409577",
+    "project_id": "jugueteria-96e05",
+    "storage_bucket": "jugueteria-96e05.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1091578409577:android:20a3c29e7a9098eba0a8f8",
+        "android_client_info": {
+          "package_name": "com.example.jugueteria"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1091578409577-0mlh42c4n8n11id8hl1odigvh55ss6sg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.jugueteria",
+            "certificate_hash": "d5bd38342aaba6178c2224c3095a3dee8f13edc7"
+          }
+        },
+        {
+          "client_id": "1091578409577-20bmfc7qqmesvub898dvale2mnl46sbt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD__Ri8dHVigHRcq5kAigSRfGGlV_2nFTU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1091578409577-20bmfc7qqmesvub898dvale2mnl46sbt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

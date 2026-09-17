@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFDF8"
+    android:id="@+id/main"
+    tools:context=".SalesActivity">
+
+
+    <!-- ====================================== -->
+    <!-- BARRA SUPERIOR                         -->
+    <!-- ====================================== -->
+
+    <LinearLayout
+        android:id="@+id/topBar"
+
+        android:layout_width="0dp"
+        android:layout_height="58dp"
+
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+
+        android:paddingStart="15dp"
+        android:paddingEnd="10dp"
+
+        android:background="@drawable/topbar_background"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <!-- Atrás -->
+
+        <ImageButton
+            android:id="@+id/btnBack"
+
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+
+            android:background="@android:color/transparent"
+            android:src="@drawable/ic_arrow_back"
+
+            android:padding="7dp"
+            android:contentDescription="Volver" />
+
+
+        <!-- Título -->
+
+        <TextView
+            android:id="@+id/txtTitle"
+
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+
+            android:layout_weight="1"
+
+            android:gravity="center"
+
+            android:text="Nueva Venta"
+            android:textColor="#27344A"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+
+        <!-- Notificaciones -->
+
+
+        <!-- Perfil -->
+
+        <ImageView
+            android:id="@+id/imgProfile"
+
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+
+            android:layout_marginStart="5dp"
+
+            android:contentDescription="Perfil"
+            android:scaleType="centerCrop"
+
+            android:src="@drawable/ic_user" />
+
+    </LinearLayout>
+
+
+    <!-- ====================================== -->
+    <!-- CONTENIDO SCROLLABLE                   -->
+    <!-- ====================================== -->
+
+    <ScrollView
+        android:id="@+id/scrollContent"
+
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        android:fillViewport="true"
+        android:clipToPadding="false"
+
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toTopOf="@id/totalContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical"
+
+            android:paddingStart="25dp"
+            android:paddingEnd="25dp"
+            android:paddingTop="18dp"
+            android:paddingBottom="15dp">
+
+
+            <!-- ================================= -->
+            <!-- CLIENTE                            -->
+            <!-- ================================= -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Cliente"
+                android:textColor="#27344A"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+
+            <AutoCompleteTextView
+                android:id="@+id/edtClient"
+
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+
+                android:layout_marginTop="7dp"
+
+                android:paddingStart="13dp"
+                android:paddingEnd="13dp"
+
+                android:hint="Seleccionar cliente..."
+                android:textColor="#27344A"
+                android:textColorHint="#A5A5A5"
+                android:textSize="14sp"
+
+                android:singleLine="true"
+
+                android:background="@drawable/input_background" />
+
+
+            <!-- ================================= -->
+            <!-- PRODUCTO                          -->
+            <!-- ================================= -->
+
+            <TextView
+                android:id="@+id/txtProductLabel"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginTop="20dp"
+
+                android:text="Producto"
+                android:textColor="#27344A"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+
+            <!-- BUSCADOR -->
+
+            <LinearLayout
+                android:id="@+id/searchProductContainer"
+
+                android:layout_width="match_parent"
+                android:layout_height="45dp"
+
+                android:layout_marginTop="7dp"
+
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+
+                android:background="@drawable/input_background">
+
+
+                <EditText
+                    android:id="@+id/edtSearchProduct"
+
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+
+                    android:layout_weight="1"
+
+                    android:background="@android:color/transparent"
+
+                    android:hint="Buscar producto..."
+                    android:textColor="#27344A"
+                    android:textColorHint="#A5A5A5"
+                    android:textSize="14sp"
+
+                    android:singleLine="true" />
+
+
+                <ImageView
+                    android:layout_width="21dp"
+                    android:layout_height="21dp"
+
+                    android:src="@drawable/ic_search"
+                    android:contentDescription="@null" />
+
+            </LinearLayout>
+
+
+            <!-- ================================= -->
+            <!-- PRODUCTOS DISPONIBLES              -->
+            <!-- ================================= -->
+
+            <androidx.cardview.widget.CardView
+
+                android:id="@+id/availableProductsCard"
+
+                android:layout_width="match_parent"
+                android:layout_height="185dp"
+
+                android:layout_marginTop="8dp"
+
+                app:cardBackgroundColor="#FFFCF5"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp">
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerAvailableProducts"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+
+                    android:clipToPadding="false"
+
+                    android:overScrollMode="never"
+
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+
+                    tools:listitem="@layout/item_sale_product" />
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- ================================= -->
+            <!-- DETALLE                            -->
+            <!-- ================================= -->
+
+            <TextView
+                android:id="@+id/txtDetail"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:layout_marginTop="18dp"
+
+                android:text="Detalle (2)"
+                android:textColor="#27344A"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+
+            <androidx.cardview.widget.CardView
+
+                android:id="@+id/detailCard"
+
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+
+                android:layout_marginTop="7dp"
+
+                app:cardBackgroundColor="#FFFCF5"
+                app:cardCornerRadius="8dp"
+                app:cardElevation="0dp">
+
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerSaleDetail"
+
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+
+                    android:clipToPadding="false"
+
+                    android:overScrollMode="never"
+
+                    app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+
+                    tools:listitem="@layout/item_sale_detail" />
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <!-- ====================================== -->
+    <!-- TOTAL                                  -->
+    <!-- ====================================== -->
+
+    <LinearLayout
+        android:id="@+id/totalContainer"
+
+        android:layout_width="0dp"
+        android:layout_height="65dp"
+
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+
+        android:background="#FFF8E8"
+
+        app:layout_constraintBottom_toTopOf="@id/btnConfirmSale"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <TextView
+            android:id="@+id/txtTotalLabel"
+
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+
+            android:layout_weight="1"
+
+            android:text="TOTAL"
+            android:textColor="#27344A"
+            android:textSize="18sp"
+            android:textStyle="bold" />
+
+
+        <TextView
+            android:id="@+id/txtTotal"
+
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="$ 18.300"
+            android:textColor="#27344A"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+
+
+    <!-- ====================================== -->
+    <!-- CONFIRMAR VENTA                        -->
+    <!-- ====================================== -->
+
+    <Button
+        android:id="@+id/btnConfirmSale"
+
+        android:layout_width="0dp"
+        android:layout_height="50dp"
+
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginBottom="15dp"
+
+        android:text="Confirmar venta"
+        android:textAllCaps="false"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold"
+
+        android:background="@drawable/button_confirm_sale"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,0 +1,460 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+
+    android:background="#FFFDF8"
+
+    tools:context=".InvoicesActivity">
+
+
+    <!-- ====================================== -->
+    <!-- BARRA SUPERIOR                         -->
+    <!-- ====================================== -->
+
+    <LinearLayout
+        android:id="@+id/topBar"
+
+        android:layout_width="0dp"
+        android:layout_height="62dp"
+
+        android:background="@drawable/topbar_background"
+        android:gravity="center_vertical"
+
+        android:orientation="horizontal"
+        android:paddingStart="15dp"
+
+        android:paddingEnd="15dp"
+
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+
+        <ImageButton
+            android:id="@+id/btnBack"
+
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+
+            android:background="@android:color/transparent"
+
+            android:contentDescription="Volver"
+
+            android:padding="7dp"
+
+            android:src="@drawable/ic_arrow_back" />
+
+
+        <TextView
+            android:id="@+id/txtTitle"
+
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+
+            android:layout_weight="1"
+
+            android:gravity="center"
+
+            android:text="Facturas"
+
+            android:textColor="#27344A"
+            android:textSize="19sp"
+            android:textStyle="bold" />
+
+
+        <ImageButton
+            android:id="@+id/btnNotifications"
+
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+
+            android:background="@android:color/transparent"
+
+            android:contentDescription="Notificaciones"
+
+            android:padding="8dp"
+
+            android:src="@drawable/ic_notification" />
+
+
+        <ImageView
+            android:id="@+id/imgProfile"
+
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+
+            android:layout_marginStart="5dp"
+
+            android:contentDescription="Perfil"
+
+            android:scaleType="centerCrop"
+
+            android:src="@drawable/ic_user" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/content"
+
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        android:orientation="vertical"
+
+        android:paddingStart="20dp"
+        android:paddingTop="22dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="15dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
+
+
+        <!-- ================================= -->
+        <!-- ENCABEZADO                         -->
+        <!-- ================================= -->
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+
+                android:layout_weight="1"
+
+                android:orientation="vertical">
+
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:text="Historial de facturas"
+
+                    android:textColor="#27344A"
+                    android:textSize="21sp"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:id="@+id/txtInvoiceCount"
+
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginTop="3dp"
+
+                    android:text="0 facturas"
+
+                    android:textColor="#777777"
+                    android:textSize="13sp" />
+
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/btnNewSale"
+
+                android:layout_width="125dp"
+                android:layout_height="45dp"
+
+                android:background="@drawable/button_new_product"
+
+                android:text="+ Nueva venta"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+
+                android:textStyle="bold" />
+
+        </LinearLayout>
+
+
+        <!-- ================================= -->
+        <!-- BUSCADOR                           -->
+        <!-- ================================= -->
+
+        <LinearLayout
+            android:id="@+id/searchContainer"
+
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+
+            android:layout_marginTop="20dp"
+
+            android:background="@drawable/search_background"
+            android:gravity="center_vertical"
+
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+
+            android:paddingEnd="12dp">
+
+
+            <ImageView
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+
+                android:contentDescription="@null"
+
+                android:src="@drawable/ic_search" />
+
+
+            <EditText
+                android:id="@+id/edtSearch"
+
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+
+                android:layout_marginStart="8dp"
+
+                android:layout_weight="1"
+
+                android:background="@android:color/transparent"
+
+                android:hint="Buscar factura..."
+
+                android:singleLine="true"
+                android:textColor="#27344A"
+
+                android:textColorHint="#A5A5A5"
+
+                android:textSize="14sp" />
+
+        </LinearLayout>
+
+
+        <!-- ================================= -->
+        <!-- RECYCLERVIEW                       -->
+        <!-- ================================= -->
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recyclerInvoices"
+
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+
+            android:layout_marginTop="15dp"
+
+            android:layout_weight="1"
+
+            android:clipToPadding="false"
+
+            android:overScrollMode="never"
+
+            android:paddingBottom="10dp"
+
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+
+            tools:listitem="@layout/item_invoice" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+
+        android:background="#FFFDF8"
+        android:elevation="8dp"
+
+        android:gravity="center_vertical"
+
+        android:orientation="horizontal"
+
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+
+        <!-- INICIO -->
+
+        <LinearLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:clickable="true"
+            android:focusable="true"
+
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:contentDescription="Inicio"
+                android:src="@drawable/ic_home" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Inicio"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+
+        <!-- VENTAS -->
+
+        <LinearLayout
+            android:id="@+id/navSales"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:clickable="true"
+            android:focusable="true"
+
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:contentDescription="Ventas"
+                android:src="@drawable/ic_cart" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Ventas"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+
+        <!-- BOTÓN + -->
+
+        <LinearLayout
+            android:id="@+id/navAdd"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:gravity="center">
+
+
+            <ImageButton
+                android:id="@+id/btnAdd"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+
+                android:background="@drawable/add_button"
+                android:contentDescription="Agregar"
+
+                android:padding="15dp"
+                android:src="@drawable/ic_add" />
+
+        </LinearLayout>
+
+
+        <!-- PRODUCTOS -->
+
+        <LinearLayout
+            android:id="@+id/navProducts"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:clickable="true"
+            android:focusable="true"
+
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:contentDescription="Productos"
+                android:src="@drawable/ic_products" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Productos"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+
+        <!-- MÁS -->
+
+        <LinearLayout
+            android:id="@+id/navInvoice"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:clickable="true"
+            android:focusable="true"
+
+            android:gravity="center"
+            android:orientation="vertical">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:contentDescription="Más"
+                android:src="@drawable/ic_document" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Facturas"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+
+    <!-- ====================================== -->
+    <!-- CONTENIDO                              -->
+    <!-- ====================================== -->
+
+</androidx.constraintlayout.widget.ConstraintLayout>

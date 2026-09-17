@@ -1,0 +1,664 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#FFFDF8"
+    android:id="@+id/main"
+    tools:context=".HomeActivity">
+
+
+    <!-- ====================================== -->
+    <!-- BARRA SUPERIOR                         -->
+    <!-- ====================================== -->
+
+    <LinearLayout
+        android:id="@+id/topBar"
+        android:layout_width="0dp"
+        android:layout_height="72dp"
+
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+
+        android:paddingStart="18dp"
+        android:paddingEnd="14dp"
+
+        android:background="@drawable/topbar_background"
+
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <!-- Menú -->
+        <ImageButton
+            android:id="@+id/btnMenu"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+
+            android:background="@android:color/transparent"
+            android:contentDescription="Menú"
+
+            android:padding="7dp"
+            android:src="@drawable/ic_menu" />
+
+
+        <!-- Espacio -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+
+        <!-- Título -->
+        <TextView
+            android:id="@+id/txtHeaderTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+
+            android:text="Inicio"
+            android:textColor="#27344A"
+            android:textSize="21sp"
+            android:textStyle="bold" />
+
+
+        <!-- Espacio -->
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+
+        <!-- Notificaciones -->
+
+
+        <!-- Perfil -->
+        <ImageView
+            android:id="@+id/imgProfile"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+
+            android:layout_marginStart="8dp"
+
+            android:contentDescription="Perfil"
+            android:scaleType="centerCrop"
+
+            android:src="@drawable/ic_user" />
+
+    </LinearLayout>
+
+
+    <!-- ====================================== -->
+    <!-- CONTENIDO                              -->
+    <!-- ====================================== -->
+
+    <ScrollView
+        android:id="@+id/scrollContent"
+
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+
+        android:fillViewport="true"
+
+        android:clipToPadding="false"
+
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toTopOf="@id/bottomNavigation"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:orientation="vertical"
+
+            android:paddingStart="25dp"
+            android:paddingEnd="25dp"
+            android:paddingTop="30dp"
+            android:paddingBottom="25dp">
+
+
+            <!-- ================================= -->
+            <!-- BIENVENIDA                        -->
+            <!-- ================================= -->
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+
+                <TextView
+                    android:id="@+id/txtWelcome"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+
+                    android:layout_weight="1"
+
+                    android:text="¡Bienvenido!"
+                    android:textColor="#27344A"
+                    android:textSize="23sp"
+                    android:textStyle="bold" />
+
+
+                <TextView
+                    android:id="@+id/txtDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:text="20 de mayo de 2024"
+                    android:textColor="#27344A"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+
+                <ImageView
+                    android:id="@+id/imgCalendar"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+
+                    android:layout_marginStart="7dp"
+
+                    android:src="@drawable/ic_calendar"
+                    android:contentDescription="Calendario" />
+
+            </LinearLayout>
+
+
+            <!-- ================================= -->
+            <!-- VENTAS DEL DÍA                    -->
+            <!-- ================================= -->
+
+            <androidx.cardview.widget.CardView
+
+                android:id="@+id/cardSales"
+
+                android:layout_width="match_parent"
+                android:layout_height="102dp"
+
+                android:layout_marginTop="30dp"
+
+                app:cardBackgroundColor="#FCF1FA"
+                app:cardCornerRadius="13dp"
+                app:cardElevation="0dp">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+
+                    android:paddingStart="28dp"
+                    android:paddingEnd="20dp">
+
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="Ventas del día"
+                            android:textColor="#27344A"
+                            android:textSize="16sp" />
+
+
+                        <TextView
+                            android:id="@+id/txtSales"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:layout_marginTop="5dp"
+
+                            android:text="$ 25.680"
+                            android:textColor="#27344A"
+                            android:textSize="27sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+
+                        android:src="@drawable/ic_cart"
+                        android:contentDescription="@null" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- ================================= -->
+            <!-- FACTURAS DEL DÍA                  -->
+            <!-- ================================= -->
+
+            <androidx.cardview.widget.CardView
+
+                android:id="@+id/cardInvoices"
+
+                android:layout_width="match_parent"
+                android:layout_height="102dp"
+
+                android:layout_marginTop="13dp"
+
+                app:cardBackgroundColor="#F0F6FA"
+                app:cardCornerRadius="13dp"
+                app:cardElevation="0dp">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+
+                    android:paddingStart="28dp"
+                    android:paddingEnd="20dp">
+
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="Facturas del día"
+                            android:textColor="#27344A"
+                            android:textSize="16sp" />
+
+
+                        <TextView
+                            android:id="@+id/txtInvoices"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:layout_marginTop="5dp"
+
+                            android:text="32"
+                            android:textColor="#27344A"
+                            android:textSize="27sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <ImageView
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+
+                        android:src="@drawable/ic_document"
+                        android:contentDescription="@null" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- ================================= -->
+            <!-- PRODUCTOS                         -->
+            <!-- ================================= -->
+
+            <androidx.cardview.widget.CardView
+
+                android:id="@+id/cardProducts"
+
+                android:layout_width="match_parent"
+                android:layout_height="102dp"
+
+                android:layout_marginTop="13dp"
+
+                app:cardBackgroundColor="#FFF8E8"
+                app:cardCornerRadius="13dp"
+                app:cardElevation="0dp">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+
+                    android:paddingStart="28dp"
+                    android:paddingEnd="20dp">
+
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="Productos"
+                            android:textColor="#27344A"
+                            android:textSize="16sp" />
+
+
+                        <TextView
+                            android:id="@+id/txtProducts"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:layout_marginTop="5dp"
+
+                            android:text="156"
+                            android:textColor="#27344A"
+                            android:textSize="27sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <ImageView
+                        android:layout_width="62dp"
+                        android:layout_height="62dp"
+
+                        android:src="@drawable/ic_box"
+                        android:contentDescription="@null" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+
+            <!-- ================================= -->
+            <!-- CLIENTES                          -->
+            <!-- ================================= -->
+
+            <androidx.cardview.widget.CardView
+
+                android:id="@+id/cardClients"
+
+                android:layout_width="match_parent"
+                android:layout_height="102dp"
+
+                android:layout_marginTop="13dp"
+
+                app:cardBackgroundColor="#F0F6FA"
+                app:cardCornerRadius="13dp"
+                app:cardElevation="0dp">
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+
+                    android:paddingStart="28dp"
+                    android:paddingEnd="20dp">
+
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:text="Clientes"
+                            android:textColor="#27344A"
+                            android:textSize="16sp" />
+
+
+                        <TextView
+                            android:id="@+id/txtClients"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+
+                            android:layout_marginTop="5dp"
+
+                            android:text="82"
+                            android:textColor="#27344A"
+                            android:textSize="27sp"
+                            android:textStyle="bold" />
+
+                    </LinearLayout>
+
+
+                    <ImageView
+                        android:layout_width="65dp"
+                        android:layout_height="65dp"
+
+                        android:src="@drawable/ic_clients"
+                        android:contentDescription="@null" />
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+        </LinearLayout>
+
+    </ScrollView>
+
+
+    <!-- ====================================== -->
+    <!-- BARRA DE NAVEGACIÓN INFERIOR           -->
+    <!-- ====================================== -->
+
+    <LinearLayout
+        android:id="@+id/bottomNavigation"
+
+        android:layout_width="0dp"
+        android:layout_height="75dp"
+
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+
+        android:background="#FFFDF8"
+
+        android:elevation="8dp"
+
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
+
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <!-- INICIO -->
+
+        <LinearLayout
+            android:id="@+id/navHome"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:orientation="vertical"
+            android:gravity="center"
+
+            android:clickable="true"
+            android:focusable="true">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:src="@drawable/ic_home"
+                android:contentDescription="Inicio" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Inicio"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+
+        <!-- VENTAS -->
+
+        <LinearLayout
+            android:id="@+id/navSales"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:orientation="vertical"
+            android:gravity="center"
+
+            android:clickable="true"
+            android:focusable="true">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:src="@drawable/ic_cart"
+                android:contentDescription="Ventas" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Ventas"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+
+        <!-- BOTÓN + -->
+
+        <LinearLayout
+            android:id="@+id/navAdd"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:gravity="center">
+
+
+            <ImageButton
+                android:id="@+id/btnAdd"
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+
+                android:background="@drawable/add_button"
+                android:src="@drawable/ic_add"
+
+                android:contentDescription="Agregar"
+                android:padding="15dp" />
+
+        </LinearLayout>
+
+
+        <!-- PRODUCTOS -->
+
+        <LinearLayout
+            android:id="@+id/navProducts"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:orientation="vertical"
+            android:gravity="center"
+
+            android:clickable="true"
+            android:focusable="true">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:src="@drawable/ic_products"
+                android:contentDescription="Productos" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Productos"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+
+        <!-- MÁS -->
+
+        <LinearLayout
+            android:id="@+id/navInvoice"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+
+            android:layout_weight="1"
+
+            android:orientation="vertical"
+            android:gravity="center"
+
+            android:clickable="true"
+            android:focusable="true">
+
+
+            <ImageView
+                android:layout_width="27dp"
+                android:layout_height="27dp"
+
+                android:contentDescription="Más"
+                android:src="@drawable/ic_document" />
+
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+
+                android:text="Facturas"
+                android:textColor="#27344A"
+                android:textSize="11sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
