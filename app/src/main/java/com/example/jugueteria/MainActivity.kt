@@ -168,6 +168,12 @@ class MainActivity : AppCompatActivity() {
         finish()
     }
 
+    private fun isAdmin(): Boolean {
+        val prefs = getSharedPreferences("jugueteria", MODE_PRIVATE)
+        val role = prefs.getString("role", "cajero")
+        return role == "administrador"
+    }
+
     // =====================================
     // MENSAJES DE ERROR
     // =====================================

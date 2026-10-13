@@ -35,3 +35,13 @@ La app Android usa `Token <token>` en el encabezado Authorization. El inicio de 
 ### Nota de autenticación y ventas
 
 El inicio de sesión móvil valida cuentas de Django (`auth_user`), no las contraseñas PHP antiguas almacenadas en `usuarios.clave`. Creá el superusuario Django con un nombre de usuario que coincida con un usuario activo del SQL original para que las ventas queden asociadas a ese operador. En un entorno de desarrollo, primero importá el dump SQL y luego ejecutá las migraciones Django. El panel administrativo administra usuarios Django y perfiles de rol, y sincroniza los nuevos usuarios con la tabla `usuarios` del SQL original cuando existen roles y sucursales importados. Las sucursales y cajas nuevas se escriben en las tablas SQL originales; los horarios se guardan en `caja_horarios`.
+
+## Panel administrativo Android
+
+El panel se divide en `AdminActivity`, `UsersActivity` / `UserEditActivity`, `OfficeActivity` / `OfficeEditActivity` y `CashboxActivity` / `CashboxEditActivity`. Las operaciones usan los endpoints protegidos por token de Django:
+
+- `GET/POST api/admin/usuarios/`, `PATCH/DELETE api/admin/usuarios/<id>/`
+- `GET/POST api/admin/sucursales/`, `PATCH/DELETE api/admin/sucursales/<id>/`
+- `GET/POST api/admin/cajas/`, `PATCH/DELETE api/admin/cajas/<id>/`
+
+Para acceder a estas rutas, el token debe pertenecer a un usuario administrador (`is_staff` / `is_superuser`). Las cajas asocian el usuario de Django con el usuario operativo de la base SQL mediante el nombre de usuario.

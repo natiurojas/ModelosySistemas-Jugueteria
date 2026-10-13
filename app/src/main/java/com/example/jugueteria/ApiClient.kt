@@ -40,6 +40,9 @@ data class ApiSaleResponse(val id: Int, val date: String? = null, val total: Dou
 data class AdminUserRequest(val username: String, val email: String, val password: String, val role: String)
 data class BranchRequest(val nombre: String, val domicilio: String, val razon_social: String)
 data class CashRegisterRequest(val sucursal: Int, val nombre: String, val cajero: Int? = null, val hora_apertura: String = "09:00", val hora_cierre: String = "18:00")
+data class AdminUserItem(val id: Int, val username: String, val email: String = "", val role: String = "cajero")
+data class OfficeItem(val id: Int, val nombre: String, val domicilio: String, val razon_social: String)
+data class CashboxItem(val id: Int, val sucursal: Int, val nombre: String, val cajero: Int? = null, val cajero_nombre: String? = null, val hora_apertura: String = "09:00:00", val hora_cierre: String = "18:00:00")
 
 interface JugueteriaApi {
     @POST("api/register/") fun register(@Body body: Map<String, @JvmSuppressWildcards String>): Call<Map<String, Any>>
@@ -53,7 +56,15 @@ interface JugueteriaApi {
     @PATCH("api/productos/{id}/") fun updateProduct(@Header("Authorization") token: String, @Path("id") id: String, @Body body: Map<String, @JvmSuppressWildcards Any>): Call<ApiProduct>
     @DELETE("api/productos/{id}/") fun deleteProduct(@Header("Authorization") token: String, @Path("id") id: String): Call<Void>
     @POST("api/admin/usuarios/") fun createUser(@Header("Authorization") token: String, @Body body: AdminUserRequest): Call<ApiMessage>
-    @GET("api/admin/usuarios/") fun users(@Header("Authorization") token: String): Call<List<Map<String, Any>>>
+    @GET("api/admin/usuarios/") fun users(@Header("Authorization") token: String): Call<List<AdminUserItem>>
+    @PATCH("api/admin/usuarios/{id}/") fun updateUser(@Header("Authorization") token: String, @Path("id") id: Int, @Body body: Map<String, @JvmSuppressWildcards Any>): Call<ApiMessage>
+    @DELETE("api/admin/usuarios/{id}/") fun deleteUser(@Header("Authorization") token: String, @Path("id") id: Int): Call<Void>
+    @GET("api/admin/sucursales/") fun offices(@Header("Authorization") token: String): Call<List<OfficeItem>>
+    @PATCH("api/admin/sucursales/{id}/") fun updateOffice(@Header("Authorization") token: String, @Path("id") id: Int, @Body body: BranchRequest): Call<ApiMessage>
+    @DELETE("api/admin/sucursales/{id}/") fun deleteOffice(@Header("Authorization") token: String, @Path("id") id: Int): Call<Void>
+    @GET("api/admin/cajas/") fun cashboxes(@Header("Authorization") token: String): Call<List<CashboxItem>>
+    @PATCH("api/admin/cajas/{id}/") fun updateCashbox(@Header("Authorization") token: String, @Path("id") id: Int, @Body body: CashRegisterRequest): Call<ApiMessage>
+    @DELETE("api/admin/cajas/{id}/") fun deleteCashbox(@Header("Authorization") token: String, @Path("id") id: Int): Call<Void>
     @POST("api/admin/sucursales/") fun createBranch(@Header("Authorization") token: String, @Body body: BranchRequest): Call<ApiMessage>
     @POST("api/admin/cajas/") fun createCashRegister(@Header("Authorization") token: String, @Body body: CashRegisterRequest): Call<ApiMessage>
 }

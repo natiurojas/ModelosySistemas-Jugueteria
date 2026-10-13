@@ -1,25 +1,69 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#FFF9EC"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Administración del sistema" android:textSize="24sp" android:textStyle="bold" android:textColor="#27344A" />
-<EditText android:id="@+id/edtAdminToken" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" android:hint="Token de administrador (DRF)" android:singleLine="true" />
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Usuarios y roles" android:textStyle="bold" android:textSize="18sp" android:layout_marginTop="14dp" />
-<EditText android:id="@+id/edtAdminUsername" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre de usuario" />
-<EditText android:id="@+id/edtAdminEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Correo" android:inputType="textEmailAddress" />
-<EditText android:id="@+id/edtAdminPassword" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Contraseña inicial" android:inputType="textPassword" />
-<Spinner android:id="@+id/spnAdminRole" android:layout_width="match_parent" android:layout_height="wrap_content" />
-<Button android:id="@+id/btnCreateAdminUser" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Crear usuario y asignar rol" />
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Datos del comercio / sucursal" android:textStyle="bold" android:textSize="18sp" android:layout_marginTop="16dp" />
-<EditText android:id="@+id/edtBranchName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre de sucursal" />
-<EditText android:id="@+id/edtBranchAddress" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Domicilio" />
-<EditText android:id="@+id/edtCompanyName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Razón social" />
-<Button android:id="@+id/btnCreateBranch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Guardar sucursal" />
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Cajas y asignación de cajero" android:textStyle="bold" android:textSize="18sp" android:layout_marginTop="16dp" />
-<EditText android:id="@+id/edtCashBranchId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="ID de sucursal" android:inputType="number" />
-<EditText android:id="@+id/edtCashName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre / número de caja" />
-<EditText android:id="@+id/edtCashierId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="ID del usuario cajero (opcional)" android:inputType="number" />
-<EditText android:id="@+id/edtCashOpen" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Apertura (09:00)" android:text="09:00" />
-<EditText android:id="@+id/edtCashClose" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Cierre (18:00)" android:text="18:00" />
-<Button android:id="@+id/btnCreateCash" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Crear caja" />
-<TextView android:id="@+id/txtAdminStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp" android:text="Los cambios requieren un token válido de administrador." android:textColor="#27344A" />
-<Button android:id="@+id/btnAdminBack" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Volver" />
-</LinearLayout></ScrollView>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#FFFDF8">
+    <LinearLayout android:id="@+id/topBar" android:layout_width="0dp" android:layout_height="62dp" android:background="@drawable/topbar_background" android:gravity="center_vertical" android:paddingHorizontal="15dp" app:layout_constraintTop_toTopOf="parent" app:layout_constraintStart_toStartOf="parent" app:layout_constraintEnd_toEndOf="parent">
+        <ImageButton android:id="@+id/btnAdminBack" android:layout_width="42dp" android:layout_height="42dp" android:background="@android:color/transparent" android:contentDescription="Volver" android:padding="7dp" android:src="@drawable/ic_arrow_back"/>
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="Administración" android:textColor="#27344A" android:textSize="20sp" android:textStyle="bold"/>
+        <View android:layout_width="42dp" android:layout_height="42dp"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="108dp"
+        android:orientation="vertical"
+        android:padding="24dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/topBar">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Panel de administración"
+            android:textColor="#27344A"
+            android:textSize="22sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="Seleccioná qué parte del sistema querés administrar."
+            android:textColor="#657084"
+            android:textSize="14sp" />
+
+        <Button
+            android:id="@+id/btnManageUsers"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/button_new_product"
+            android:text="Administrar Usuarios"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnManageOffices"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_new_product"
+            android:text="Sucursal"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btnManageCashboxes"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/button_new_product"
+            android:text="Administrar Cajas"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

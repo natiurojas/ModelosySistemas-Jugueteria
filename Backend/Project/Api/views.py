@@ -155,6 +155,12 @@ class AdminUsuariosView(generics.ListCreateAPIView):
     serializer_class = AdminUserSerializer
     permission_classes = [IsAdminUser]
     queryset = User.objects.all().order_by("username")
+    def get(self, request, *args, **kwargs):
+        rows=[]
+        for user in self.get_queryset():
+            perfil=getattr(user, "perfil_sistema", None)
+            rows.append({"id":user.id,"username":user.username,"email":user.email,"role":perfil.rol if perfil else ("administrador" if user.is_staff or user.is_superuser else "cajero")})
+        return Response(rows)
 
 class AdminSucursalesView(generics.ListCreateAPIView):
     serializer_class = SucursalSerializer
@@ -305,8 +311,24 @@ class AdminCajasView(APIView):
     def get(self, request):
         with connection.cursor() as cursor:
             cursor.execute("CREATE TABLE IF NOT EXISTS caja_horarios (caja_id INT NOT NULL PRIMARY KEY, hora_apertura TIME NOT NULL DEFAULT '09:00:00', hora_cierre TIME NOT NULL DEFAULT '18:00:00') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4")
-            cursor.execute("SELECT c.id,c.sucursal_id,c.nombre,c.usuario_id,COALESCE(h.hora_apertura,'09:00:00'),COALESCE(h.hora_cierre,'18:00:00') FROM cajas c LEFT JOIN caja_horarios h ON h.caja_id=c.id ORDER BY c.id")
-            return Response([{"id":r[0],"sucursal":r[1],"nombre":r[2] or "","cajero":r[3],"hora_apertura":str(r[4]),"hora_cierre":str(r[5])} for r in cursor.fetchall()])
+            cursor.execute("""
+                SELECT
+                    c.id,
+                    c.sucursal_id,
+                    c.nombre,
+                    c.usuario_id,
+                    COALESCE(h.hora_apertura, '09:00:00'),
+                    COALESCE(h.hora_cierre, '18:00:00'),
+                    u.nombre,
+                    au.id
+                FROM cajas c
+                LEFT JOIN caja_horarios h ON h.caja_id = c.id
+                LEFT JOIN usuarios u ON u.id = c.usuario_id
+                LEFT JOIN auth_user au
+                    ON au.username COLLATE utf8mb4_general_ci = u.usuario
+                ORDER BY c.id
+            """)
+            return Response([{"id":r[0],"sucursal":r[1],"nombre":r[2] or "","cajero":r[7] or r[3],"cajero_legacy_id":r[3],"cajero_nombre":r[6] or "","hora_apertura":str(r[4]),"hora_cierre":str(r[5])} for r in cursor.fetchall()])
     def post(self, request):
         try: sucursal=int(request.data.get("sucursal"))
         except (TypeError,ValueError): return Response({"detail":"ID de sucursal inválido"}, status=400)
@@ -327,3 +349,86 @@ class AdminCajasView(APIView):
             cursor.execute("INSERT INTO cajas (sucursal_id,nombre,usuario_id) VALUES (%s,%s,%s)", [sucursal,nombre,legacy_cashier]); cid=cursor.lastrowid
             cursor.execute("INSERT INTO caja_horarios (caja_id,hora_apertura,hora_cierre) VALUES (%s,%s,%s)", [cid,apertura,cierre])
         return Response({"id":cid,"sucursal":sucursal,"nombre":nombre,"cajero":legacy_cashier,"hora_apertura":apertura,"hora_cierre":cierre}, status=201)
+
+# Operaciones de detalle para el panel administrativo Android.
+class AdminUsuarioDetalleView(APIView):
+    permission_classes = [IsAdminUser]
+    def patch(self, request, pk):
+        try: user = User.objects.get(pk=pk)
+        except User.DoesNotExist: return Response({"detail":"Usuario no encontrado"}, status=404)
+        username = request.data.get("username", user.username)
+        email = request.data.get("email", user.email)
+        role = request.data.get("role")
+        if role and role not in ["administrador", "gerente", "deposito", "cajero"]:
+            return Response({"detail":"Rol inválido"}, status=400)
+        user.username = str(username).strip(); user.email = str(email).strip()
+        if not user.username or not user.email: return Response({"detail":"Nombre y correo son obligatorios"}, status=400)
+        if role == "administrador": user.is_staff = True
+        elif role: user.is_staff = False
+        user.save()
+        if role:
+            PerfilSistema.objects.update_or_create(usuario=user, defaults={"rol":role})
+            role_names = {"administrador":"admin", "gerente":"gerencial", "deposito":"recepcion", "cajero":"caja"}
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT id FROM roles WHERE nombre=%s AND activo=1 LIMIT 1", [role_names[role]])
+                role_row=cursor.fetchone()
+                cursor.execute("SELECT id FROM usuarios WHERE usuario=%s OR usuario=%s LIMIT 1", [user.username, request.data.get("username", user.username)])
+                legacy=cursor.fetchone()
+                if role_row and legacy:
+                    cursor.execute("UPDATE usuarios SET nombre=%s,usuario=%s,rol_id=%s WHERE id=%s", [user.username,user.username,role_row[0],legacy[0]])
+        return Response({"id":user.id,"username":user.username,"email":user.email,"role":role or getattr(getattr(user,"perfil_sistema",None),"rol","cajero")})
+    def delete(self, request, pk):
+        try: user = User.objects.get(pk=pk)
+        except User.DoesNotExist: return Response({"detail":"Usuario no encontrado"}, status=404)
+        if user.pk == request.user.pk: return Response({"detail":"No podés eliminar tu propio usuario"}, status=400)
+        user.delete(); return Response(status=204)
+
+class AdminSucursalDetalleView(APIView):
+    permission_classes = [IsAdminUser]
+    def patch(self, request, pk):
+        nombre=str(request.data.get("nombre", "")).strip(); domicilio=str(request.data.get("domicilio", "")).strip(); razon=str(request.data.get("razon_social", "")).strip()
+        if not nombre or not domicilio or not razon: return Response({"detail":"Todos los campos son obligatorios"},status=400)
+        with connection.cursor() as cursor:
+            cursor.execute("UPDATE sucursales SET nombre=%s,direccion=%s,rs=%s WHERE id=%s",[nombre,domicilio,razon,pk])
+            if cursor.rowcount == 0:
+                cursor.execute("SELECT id FROM sucursales WHERE id=%s",[pk])
+                if not cursor.fetchone(): return Response({"detail":"Sucursal no encontrada"},status=404)
+        return Response({"id":int(pk),"nombre":nombre,"domicilio":domicilio,"razon_social":razon})
+    def delete(self, request, pk):
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM cajas WHERE sucursal_id=%s LIMIT 1",[pk])
+            if cursor.fetchone(): return Response({"detail":"No se puede eliminar una sucursal que tiene cajas asociadas"},status=400)
+            cursor.execute("DELETE FROM sucursales WHERE id=%s",[pk])
+            if cursor.rowcount == 0: return Response({"detail":"Sucursal no encontrada"},status=404)
+        return Response(status=204)
+
+class AdminCajaDetalleView(APIView):
+    permission_classes = [IsAdminUser]
+    def patch(self, request, pk):
+        try: sucursal=int(request.data.get("sucursal")); nombre=str(request.data.get("nombre", "")).strip()
+        except (TypeError,ValueError): return Response({"detail":"Sucursal inválida"},status=400)
+        cajero=request.data.get("cajero")
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id FROM sucursales WHERE id=%s",[sucursal])
+            if not cursor.fetchone(): return Response({"detail":"La sucursal no existe"},status=400)
+            legacy_cashier=None
+            if cajero not in (None,"",0,"0"):
+                try: u=User.objects.get(pk=int(cajero))
+                except (ValueError,User.DoesNotExist): return Response({"detail":"Cajero inválido"},status=400)
+                cursor.execute("SELECT id FROM usuarios WHERE usuario=%s AND estado=1 LIMIT 1",[u.username]); found=cursor.fetchone()
+                if not found: return Response({"detail":"El usuario no está sincronizado con la tabla operativa usuarios"},status=400)
+                legacy_cashier=found[0]
+            cursor.execute("UPDATE cajas SET sucursal_id=%s,nombre=%s,usuario_id=%s WHERE id=%s",[sucursal,nombre,legacy_cashier,pk])
+            if cursor.rowcount == 0:
+                cursor.execute("SELECT id FROM cajas WHERE id=%s",[pk])
+                if not cursor.fetchone(): return Response({"detail":"Caja no encontrada"},status=404)
+            apertura=str(request.data.get("hora_apertura","09:00")); cierre=str(request.data.get("hora_cierre","18:00"))
+            if parse_time(apertura) is None or parse_time(cierre) is None: return Response({"detail":"Las horas deben tener formato HH:mm"},status=400)
+            cursor.execute("CREATE TABLE IF NOT EXISTS caja_horarios (caja_id INT NOT NULL PRIMARY KEY, hora_apertura TIME NOT NULL DEFAULT '09:00:00', hora_cierre TIME NOT NULL DEFAULT '18:00:00') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4")
+            cursor.execute("INSERT INTO caja_horarios(caja_id,hora_apertura,hora_cierre) VALUES(%s,%s,%s) ON DUPLICATE KEY UPDATE hora_apertura=VALUES(hora_apertura),hora_cierre=VALUES(hora_cierre)",[pk,apertura,cierre])
+        return Response({"id":int(pk),"sucursal":sucursal,"nombre":nombre,"cajero":legacy_cashier,"hora_apertura":apertura,"hora_cierre":cierre})
+    def delete(self, request, pk):
+        with connection.cursor() as cursor:
+            cursor.execute("DELETE FROM caja_horarios WHERE caja_id=%s",[pk]); cursor.execute("DELETE FROM cajas WHERE id=%s",[pk])
+            if cursor.rowcount == 0: return Response({"detail":"Caja no encontrada"},status=404)
+        return Response(status=204)
