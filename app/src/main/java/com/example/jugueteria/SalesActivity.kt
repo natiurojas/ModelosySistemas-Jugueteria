@@ -2,8 +2,10 @@ package com.example.jugueteria
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.AutoCompleteTextView
 import android.widget.Button
+import android.widget.EditText
+import android.text.Editable
+import android.text.TextWatcher
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -23,8 +25,9 @@ class SalesActivity : AppCompatActivity() {
     private lateinit var txtDetail: TextView
 
     private val saleItems = mutableListOf<SaleItem>()
+    private var availableProducts: List<Product> = emptyList()
 
-    private lateinit var firebase: FirebaseConnect
+    private lateinit var backend: DjangoRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -50,10 +53,10 @@ class SalesActivity : AppCompatActivity() {
         }
 
         // =================================
-        // FIREBASE
+        // DJANGO
         // =================================
 
-        firebase = FirebaseConnect(this)
+        backend = DjangoRepository(this)
 
         // =================================
         // RECYCLER PRODUCTOS
@@ -86,7 +89,7 @@ class SalesActivity : AppCompatActivity() {
             findViewById(R.id.txtDetail)
 
         // =================================
-        // CARGAR PRODUCTOS DESDE FIREBASE
+        // CARGAR PRODUCTOS DESDE DJANGO
         // =================================
 
         cargarProductos()
@@ -114,6 +117,10 @@ class SalesActivity : AppCompatActivity() {
             finish()
         }
 
+        findViewById<Button>(R.id.btnBarcodeProduct).setOnClickListener {
+            startActivityForResult(Intent(this, BarcodeProductActivity::class.java), 241)
+        }
+
         // =================================
         // CONFIRMAR VENTA
         // =================================
@@ -134,7 +141,7 @@ class SalesActivity : AppCompatActivity() {
 
     private fun cargarProductos() {
 
-        firebase.getProducts { products, error ->
+        backend.getProducts { products, error ->
 
             if (error != null) {
 
@@ -147,14 +154,37 @@ class SalesActivity : AppCompatActivity() {
                 return@getProducts
             }
 
-            recyclerProducts.adapter =
-                SaleProductAdapter(
-                    products
-                ) { product ->
-
-                    addProduct(product)
-                }
+            availableProducts = products
+            showFilteredProducts("")
+            findViewById<EditText>(R.id.edtSearchProduct).addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { showFilteredProducts(s?.toString().orEmpty()) }
+                override fun afterTextChanged(s: Editable?) {}
+            })
         }
+    }
+
+    @Deprecated("Deprecated in Android API; kept for compatibility with this project")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == 241 && resultCode == RESULT_OK && data != null) {
+            val product = Product(
+                id = data.getStringExtra("id") ?: return,
+                imageRes = "", name = data.getStringExtra("name") ?: "Producto",
+                description = data.getStringExtra("description") ?: "", category = "",
+                price = data.getDoubleExtra("price", 0.0), stock = data.getIntExtra("stock", 0)
+            )
+            addProduct(product)
+        }
+    }
+
+    private fun showFilteredProducts(query: String) {
+        val filtered = availableProducts.filter { product ->
+            product.name.contains(query, ignoreCase = true) ||
+                product.description.contains(query, ignoreCase = true) ||
+                product.id.contains(query, ignoreCase = true)
+        }
+        recyclerProducts.adapter = SaleProductAdapter(filtered) { product -> addProduct(product) }
     }
 
     // =====================================
@@ -261,26 +291,6 @@ class SalesActivity : AppCompatActivity() {
             return
         }
 
-        // Obtener cliente
-        val edtClient =
-            findViewById<AutoCompleteTextView>(
-                R.id.edtClient
-            )
-
-        val clientName =
-            edtClient.text.toString().trim()
-
-        if (clientName.isBlank()) {
-
-            Toast.makeText(
-                this,
-                "Ingresá un cliente",
-                Toast.LENGTH_SHORT
-            ).show()
-
-            return
-        }
-
         // =================================
         // CALCULAR TOTAL
         // =================================
@@ -297,13 +307,13 @@ class SalesActivity : AppCompatActivity() {
 
         val sale = Sale(
 
-            // Firebase generará el ID
+            // Django devuelve el ID de la factura creada
             id = "",
 
             // Usuario actualmente logueado
-            userId = firebase.getCurrentUserId() ?: "",
+            userId = backend.getCurrentUserId() ?: "",
 
-            clientName = clientName,
+            clientName = "",
 
             // Fecha como timestamp
             date = System.currentTimeMillis(),
@@ -321,7 +331,7 @@ class SalesActivity : AppCompatActivity() {
         // GUARDAR EN FIRESTORE
         // =================================
 
-        firebase.addSale(sale) { success, saleId, error ->
+        backend.addSale(sale) { success, saleId, error ->
 
             if (success) {
 

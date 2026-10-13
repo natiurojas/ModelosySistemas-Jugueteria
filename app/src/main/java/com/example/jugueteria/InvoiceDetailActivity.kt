@@ -22,7 +22,7 @@ class InvoiceDetailActivity : AppCompatActivity() {
     private lateinit var txtTotal: TextView
     private lateinit var recyclerItems: RecyclerView
 
-    private lateinit var firebase: FirebaseConnect
+    private lateinit var backend: DjangoRepository
 
     private var sale: Sale? = null
 
@@ -56,11 +56,11 @@ class InvoiceDetailActivity : AppCompatActivity() {
         }
 
         // =================================
-        // FIREBASE
+        // DJANGO
         // =================================
 
-        firebase =
-            FirebaseConnect(this)
+        backend =
+            DjangoRepository(this)
 
         // =================================
         // VIEWS
@@ -146,7 +146,7 @@ class InvoiceDetailActivity : AppCompatActivity() {
         saleId: String
     ) {
 
-        firebase.getSale(
+        backend.getSale(
             saleId
         ) { result, error ->
 
@@ -219,7 +219,7 @@ class InvoiceDetailActivity : AppCompatActivity() {
         // =================================
 
         txtClient.text =
-            sale.clientName
+            sale.clientName.ifBlank { "Consumidor final" }
 
         // =================================
         // TOTAL
@@ -270,7 +270,7 @@ class InvoiceDetailActivity : AppCompatActivity() {
         )
 
         builder.append(
-            "Cliente: ${sale.clientName}\n\n"
+            "Cliente: ${sale.clientName.ifBlank { "Consumidor final" }}\n\n"
         )
 
         builder.append(

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -13,13 +12,12 @@ import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var firebase: FirebaseConnect
 
     private lateinit var edtUsername: EditText
     private lateinit var edtPassword: EditText
+    private lateinit var edtServerIp: EditText
 
     private lateinit var btnLogin: Button
-    private lateinit var googleContainer: LinearLayout
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -50,12 +48,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // =================================
-        // FIREBASE
-        // =================================
-
-        firebase =
-            FirebaseConnect(this)
+        ApiClient.restore(this)
 
         // =================================
         // VIEWS
@@ -70,15 +63,12 @@ class MainActivity : AppCompatActivity() {
             findViewById(
                 R.id.edtPassword
             )
+        edtServerIp = findViewById(R.id.edtServerIp)
+        edtServerIp.setText(getSharedPreferences("jugueteria", MODE_PRIVATE).getString("backend_host", "10.0.2.2:8000"))
 
         btnLogin =
             findViewById(
                 R.id.btnLogin
-            )
-
-        googleContainer =
-            findViewById(
-                R.id.googleContainer
             )
 
         // =================================
@@ -90,19 +80,11 @@ class MainActivity : AppCompatActivity() {
             loginWithEmail()
         }
 
-        // =================================
-        // LOGIN GOOGLE
-        // =================================
+        // El inicio de sesión se realiza contra Django.
+        findViewById<android.widget.LinearLayout>(R.id.googleContainer).visibility = android.view.View.GONE
 
-        googleContainer.setOnClickListener {
-
-            loginWithGoogle()
-        }
-        if(firebase.getCurrentUser() != null)
-        {
-            val intent = Intent(this, HomeActivity::class.java)
-            startActivity(intent)
-            finish()
+        if (getSharedPreferences("jugueteria", MODE_PRIVATE).getString("token", null) != null) {
+            startActivity(Intent(this, HomeActivity::class.java)); finish()
         }
     }
 
@@ -128,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         if (email.isBlank()) {
 
             edtUsername.error =
-                "Ingresá tu correo"
+                "Ingresá tu usuario"
 
             edtUsername.requestFocus()
 
@@ -145,76 +127,28 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        // =================================
-        // FIREBASE LOGIN
-        // =================================
-
+        // Configurar la URL de Django y autenticar con Retrofit.
+        try { ApiClient.configure(this, edtServerIp.text.toString()) } catch (e: Exception) {
+            edtServerIp.error = e.message ?: "IP inválida"
+            return
+        }
         btnLogin.isEnabled = false
-
-        firebase.loginWithEmail(
-            email,
-            password
-        ) { success, exception ->
-
-            btnLogin.isEnabled = true
-
-            if (success) {
-
-                Toast.makeText(
-                    this,
-                    "¡Bienvenido!",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                openHome()
-
-            } else {
-
-                Toast.makeText(
-                    this,
-                    getLoginErrorMessage(
-                        exception
-                    ),
-                    Toast.LENGTH_LONG
-                ).show()
+        ApiClient.api.login(ApiLoginRequest(email, password)).enqueue(object : retrofit2.Callback<ApiLoginResponse> {
+            override fun onResponse(call: retrofit2.Call<ApiLoginResponse>, response: retrofit2.Response<ApiLoginResponse>) {
+                btnLogin.isEnabled = true
+                val data = response.body()
+                if (response.isSuccessful && !data?.token.isNullOrBlank()) {
+                    getSharedPreferences("jugueteria", MODE_PRIVATE).edit()
+                        .putString("token", data!!.token).putString("username", data.usuario ?: email).putString("role", data.role ?: "cajero").apply()
+                    Toast.makeText(this@MainActivity, "¡Bienvenido!", Toast.LENGTH_SHORT).show()
+                    openHome()
+                } else Toast.makeText(this@MainActivity, data?.error ?: "Credenciales incorrectas (HTTP ${response.code()})", Toast.LENGTH_LONG).show()
             }
-        }
-    }
-
-    // =====================================
-    // LOGIN GOOGLE
-    // =====================================
-
-    private fun loginWithGoogle() {
-
-        googleContainer.isEnabled = false
-
-        firebase.loginWithGoogle {
-                success,
-                isNewUser,
-                exception ->
-
-            googleContainer.isEnabled = true
-
-            if (success) {
-
-                Toast.makeText(
-                    this,
-                    "¡Bienvenido!",
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                openHome()
-
-            } else {
-
-                Toast.makeText(
-                    this,
-                    "No se pudo iniciar sesión con Google",
-                    Toast.LENGTH_LONG
-                ).show()
+            override fun onFailure(call: retrofit2.Call<ApiLoginResponse>, t: Throwable) {
+                btnLogin.isEnabled = true
+                Toast.makeText(this@MainActivity, "No se pudo conectar con Django: ${t.localizedMessage}", Toast.LENGTH_LONG).show()
             }
-        }
+        })
     }
 
     // =====================================

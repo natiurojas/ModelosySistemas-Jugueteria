@@ -16,7 +16,7 @@ import androidx.recyclerview.widget.RecyclerView
 class ProductsActivity : AppCompatActivity() {
 
     private lateinit var recyclerProducts: RecyclerView
-    private lateinit var firebase: FirebaseConnect
+    private lateinit var backend: DjangoRepository
 
     // =================================
     // NAVEGACIÓN
@@ -62,11 +62,11 @@ class ProductsActivity : AppCompatActivity() {
         }
 
         // =================================
-        // FIREBASE
+        // DJANGO
         // =================================
 
-        firebase =
-            FirebaseConnect(this)
+        backend =
+            DjangoRepository(this)
 
         // =================================
         // VIEWS
@@ -207,7 +207,7 @@ class ProductsActivity : AppCompatActivity() {
 
     private fun cargarProductos() {
 
-        firebase.getProducts { products, error ->
+        backend.getProducts { products, error ->
 
             if (error != null) {
 
@@ -278,7 +278,7 @@ class ProductsActivity : AppCompatActivity() {
         product: Product
     ) {
 
-        firebase.deleteProduct(
+        backend.deleteProduct(
             product.id
         ) { success, error ->
 
@@ -311,7 +311,7 @@ class ProductsActivity : AppCompatActivity() {
 
         super.onResume()
 
-        if (::firebase.isInitialized) {
+        if (::backend.isInitialized) {
 
             cargarProductos()
         }

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent" android:background="#FFF9EC"><LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:padding="20dp">
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Administración del sistema" android:textSize="24sp" android:textStyle="bold" android:textColor="#27344A" />
+<EditText android:id="@+id/edtAdminToken" android:layout_width="match_parent" android:layout_height="wrap_content" android:visibility="gone" android:hint="Token de administrador (DRF)" android:singleLine="true" />
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Usuarios y roles" android:textStyle="bold" android:textSize="18sp" android:layout_marginTop="14dp" />
+<EditText android:id="@+id/edtAdminUsername" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre de usuario" />
+<EditText android:id="@+id/edtAdminEmail" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Correo" android:inputType="textEmailAddress" />
+<EditText android:id="@+id/edtAdminPassword" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Contraseña inicial" android:inputType="textPassword" />
+<Spinner android:id="@+id/spnAdminRole" android:layout_width="match_parent" android:layout_height="wrap_content" />
+<Button android:id="@+id/btnCreateAdminUser" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Crear usuario y asignar rol" />
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Datos del comercio / sucursal" android:textStyle="bold" android:textSize="18sp" android:layout_marginTop="16dp" />
+<EditText android:id="@+id/edtBranchName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre de sucursal" />
+<EditText android:id="@+id/edtBranchAddress" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Domicilio" />
+<EditText android:id="@+id/edtCompanyName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Razón social" />
+<Button android:id="@+id/btnCreateBranch" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Guardar sucursal" />
+<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Cajas y asignación de cajero" android:textStyle="bold" android:textSize="18sp" android:layout_marginTop="16dp" />
+<EditText android:id="@+id/edtCashBranchId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="ID de sucursal" android:inputType="number" />
+<EditText android:id="@+id/edtCashName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Nombre / número de caja" />
+<EditText android:id="@+id/edtCashierId" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="ID del usuario cajero (opcional)" android:inputType="number" />
+<EditText android:id="@+id/edtCashOpen" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Apertura (09:00)" android:text="09:00" />
+<EditText android:id="@+id/edtCashClose" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Cierre (18:00)" android:text="18:00" />
+<Button android:id="@+id/btnCreateCash" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Crear caja" />
+<TextView android:id="@+id/txtAdminStatus" android:layout_width="match_parent" android:layout_height="wrap_content" android:padding="12dp" android:text="Los cambios requieren un token válido de administrador." android:textColor="#27344A" />
+<Button android:id="@+id/btnAdminBack" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Volver" />
+</LinearLayout></ScrollView>

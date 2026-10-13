@@ -1,0 +1,70 @@
+{% extends 'Base.html' %}
+{% load static %}
+
+{% block section_title %}Carrito{% endblock %}
+
+{% block content %}
+<div class="cart-page">
+    <div class="cart-header">
+        <h1 class="page-title">Tu Carrito</h1>
+        <p class="page-subtitle">Revisá tus productos antes de comprar</p>
+    </div>
+
+    {% if items %}
+    <div class="cart-grid">
+        {% for item in items %}
+        <div class="cart-item">
+            <div class="cart-item-imagen">
+                {% if item.producto.imagen %}
+                <img src="{{ item.producto.imagen.url }}" alt="{{ item.producto.nombre }}">
+                {% else %}
+                <div class="cart-item-placeholder">FUNKO</div>
+                {% endif %}
+            </div>
+            <div class="cart-item-info">
+                <h3>{{ item.producto.nombre }}</h3>
+                <p class="cart-item-desc">{{ item.producto.descripcion }}</p>
+                <p class="cart-item-precio">${{ item.producto.precio }}</p>
+            </div>
+            <div class="cart-item-cantidad">
+                <span>Cantidad: {{ item.cantidad }}</span>
+            </div>
+            <div class="cart-item-subtotal">
+                <p class="cart-subtotal-label">Subtotal</p>
+                <p class="cart-subtotal-valor">${{ item.producto.precio|floatformat:2 }}</p>
+            </div>
+            <div class="cart-item-accion">
+                <form action="{% url 'EliminarDelCarrito' item.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="btn-eliminar">Eliminar</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="cart-resumen">
+        <div class="cart-resumen-box">
+            <h3>Resumen del pedido</h3>
+            <div class="cart-resumen-linea">
+                <span>Productos ({{ items|length }})</span>
+                <span>${{ total|floatformat:2 }}</span>
+            </div>
+            <div class="cart-resumen-linea cart-resumen-total">
+                <span>Total</span>
+                <span>${{ total|floatformat:2 }}</span>
+            </div>
+            <a href="" class="btn btn-pagar">Proceder al pago</a>
+            <a href="{% url 'Productos' %}" class="btn-seguir">Seguir comprando</a>
+        </div>
+    </div>
+    {% else %}
+    <div class="cart-vacio">
+        <div class="cart-vacio-icono">&#128722;</div>
+        <h2>Tu carrito está vacío</h2>
+        <p>Agregá productos para empezar tu colección.</p>
+        <a href="{% url 'Productos' %}" class="btn">Ver productos</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

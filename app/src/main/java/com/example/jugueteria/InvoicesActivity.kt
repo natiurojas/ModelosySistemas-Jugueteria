@@ -20,7 +20,7 @@ class InvoicesActivity : AppCompatActivity() {
     private lateinit var txtInvoiceCount: TextView
     private lateinit var adapter: InvoiceAdapter
 
-    private lateinit var firebase: FirebaseConnect
+    private lateinit var backend: DjangoRepository
 
     // =================================
     // NAVEGACIÓN
@@ -67,11 +67,11 @@ class InvoicesActivity : AppCompatActivity() {
         }
 
         // =================================
-        // FIREBASE
+        // DJANGO
         // =================================
 
-        firebase =
-            FirebaseConnect(this)
+        backend =
+            DjangoRepository(this)
 
         // =================================
         // VIEWS
@@ -231,7 +231,7 @@ class InvoicesActivity : AppCompatActivity() {
 
     private fun cargarFacturas() {
 
-        firebase.getSales { sales, error ->
+        backend.getSales { sales, error ->
 
             if (error != null) {
 
@@ -296,7 +296,7 @@ class InvoicesActivity : AppCompatActivity() {
 
         super.onResume()
 
-        if (::firebase.isInitialized) {
+        if (::backend.isInitialized) {
 
             cargarFacturas()
         }

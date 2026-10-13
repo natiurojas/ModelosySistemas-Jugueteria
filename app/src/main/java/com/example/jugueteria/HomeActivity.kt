@@ -16,7 +16,7 @@ import java.util.Locale
 
 class HomeActivity : AppCompatActivity() {
 
-    private lateinit var firebase: FirebaseConnect
+    private lateinit var backend: DjangoRepository
 
     private lateinit var txtWelcome: TextView
     private lateinit var txtDate: TextView
@@ -24,7 +24,6 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var txtSales: TextView
     private lateinit var txtInvoices: TextView
     private lateinit var txtProducts: TextView
-    private lateinit var txtClients: TextView
 
     private lateinit var navHome: LinearLayout
     private lateinit var navSales: LinearLayout
@@ -64,11 +63,11 @@ class HomeActivity : AppCompatActivity() {
         }
 
         // =================================
-        // FIREBASE
+        // DJANGO
         // =================================
 
-        firebase =
-            FirebaseConnect(this)
+        backend =
+            DjangoRepository(this)
 
         // =================================
         // VIEWS
@@ -89,8 +88,6 @@ class HomeActivity : AppCompatActivity() {
         txtProducts =
             findViewById(R.id.txtProducts)
 
-        txtClients =
-            findViewById(R.id.txtClients)
 
         navHome =
             findViewById(R.id.navHome)
@@ -159,14 +156,8 @@ class HomeActivity : AppCompatActivity() {
 
     private fun showCurrentUser() {
 
-        val user =
-            firebase.getCurrentUser()
-
-        val name =
-            user?.displayName
-                ?: user?.email
-                    ?.substringBefore("@")
-                ?: "Usuario"
+        val name = getSharedPreferences("jugueteria", MODE_PRIVATE)
+            .getString("username", null) ?: "Usuario"
 
         txtWelcome.text =
             "¡Bienvenido, $name!"
@@ -282,7 +273,6 @@ class HomeActivity : AppCompatActivity() {
 
         loadProductsCount()
 
-        loadClientsCount()
     }
 
     // =====================================
@@ -291,7 +281,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun loadSalesToday() {
 
-        firebase.getSales { sales, error ->
+        backend.getSales { sales, error ->
 
             if (error != null) {
 
@@ -373,7 +363,7 @@ class HomeActivity : AppCompatActivity() {
 
     private fun loadProductsCount() {
 
-        firebase.getProducts { products, error ->
+        backend.getProducts { products, error ->
 
             if (error != null) {
 
@@ -389,27 +379,6 @@ class HomeActivity : AppCompatActivity() {
     }
 
     // =====================================
-    // CANTIDAD DE CLIENTES
-    // =====================================
-
-    private fun loadClientsCount() {
-
-        firebase.getClients { clients, error ->
-
-            if (error != null) {
-
-                txtClients.text =
-                    "0"
-
-                return@getClients
-            }
-
-            txtClients.text =
-                clients.size.toString()
-        }
-    }
-
-    // =====================================
     // MENÚ
     // =====================================
 
@@ -419,13 +388,14 @@ class HomeActivity : AppCompatActivity() {
             .setTitle("Menú")
             .setItems(
                 arrayOf(
+                    "Panel de administración",
                     "Cerrar sesión"
                 )
             ) { _, which ->
 
                 when (which) {
-
-                    0 -> logout()
+                    0 -> startActivity(Intent(this, AdminActivity::class.java))
+                    1 -> logout()
                 }
             }
             .show()
@@ -437,7 +407,8 @@ class HomeActivity : AppCompatActivity() {
 
     private fun logout() {
 
-        firebase.logout()
+        getSharedPreferences("jugueteria", MODE_PRIVATE).edit().remove("token").remove("username").remove("role").apply()
+        backend.logout()
 
         val intent =
             Intent(
@@ -462,7 +433,7 @@ class HomeActivity : AppCompatActivity() {
 
         super.onResume()
 
-        if (::firebase.isInitialized) {
+        if (::backend.isInitialized) {
 
             showCurrentUser()
 

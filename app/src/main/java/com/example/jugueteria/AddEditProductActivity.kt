@@ -13,7 +13,7 @@ import androidx.core.view.WindowInsetsCompat
 
 class AddEditProductActivity : AppCompatActivity() {
 
-    private lateinit var firebase: FirebaseConnect
+    private lateinit var backend: DjangoRepository
 
     private lateinit var txtTitle: TextView
 
@@ -64,11 +64,11 @@ class AddEditProductActivity : AppCompatActivity() {
         }
 
         // =================================
-        // FIREBASE
+        // DJANGO
         // =================================
 
-        firebase =
-            FirebaseConnect(this)
+        backend =
+            DjangoRepository(this)
 
         // =================================
         // VIEWS
@@ -165,7 +165,7 @@ class AddEditProductActivity : AppCompatActivity() {
         id: String
     ) {
 
-        firebase.getProductById(
+        backend.getProductById(
             id
         ) { product, error ->
 
@@ -345,7 +345,7 @@ class AddEditProductActivity : AppCompatActivity() {
 
         if (productId == null) {
 
-            firebase.addProduct(
+            backend.addProduct(
                 product
             ) { success, error ->
 
@@ -377,7 +377,7 @@ class AddEditProductActivity : AppCompatActivity() {
             // EDITAR
             // =================================
 
-            firebase.updateProduct(
+            backend.updateProduct(
                 product.id,
                 product
             ) { success, error ->

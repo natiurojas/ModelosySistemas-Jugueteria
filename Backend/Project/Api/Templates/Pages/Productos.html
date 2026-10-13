@@ -1,0 +1,123 @@
+{% extends 'Base.html' %}
+{% load static %}
+
+{% block section_title %}Productos{% endblock %}
+
+{% block content %}
+
+<section class="productos-page">
+
+    <div class="productos-header">
+        <h1 class="page-title">Nuestros Productos</h1>
+        <p class="page-subtitle">
+            Descubrí la colección oficial de Funko Pop Star Wars
+        </p>
+    </div>
+
+    {% if prods %}
+
+    <div class="productos-grid">
+
+        {% for prod in prods %}
+
+        <article class="producto-card">
+
+            <div class="producto-glow"></div>
+
+            <span class="producto-badge">
+                ⭐ Original
+            </span>
+
+            <div class="producto-header">
+
+                <span class="producto-categoria">
+                    {{ prod.categoria|default:"Colección Star Wars" }}
+                </span>
+
+                <h3>{{ prod.nombre }}</h3>
+
+            </div>
+
+            <div class="producto-imagen">
+
+                {% if prod.imagen %}
+
+                    <img src="{{ prod.imagen.url }}" alt="{{ prod.nombre }}">
+
+                {% else %}
+
+                    <div class="producto-imagen-placeholder">
+
+                        FUNKO
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+            <div class="producto-info">
+
+                <p class="producto-descripcion">
+
+                    {{ prod.descripcion }}
+
+                </p>
+
+                <div class="precio-box">
+
+                    <span>Precio</span>
+
+                    <h2>${{ prod.precio }}</h2>
+
+                </div>
+
+                <div class="producto-acciones">
+
+                    {% if user.is_authenticated %}
+
+                    <form action="{% url 'AgregarAlCarrito' prod.id %}" method="post">
+
+                        {% csrf_token %}
+
+                        <button class="btn-comprar">
+
+                            🛒 Agregar al carrito
+
+                        </button>
+
+                    </form>
+
+                    {% endif %}
+
+                    <a href="{% url 'ModificarProd' prod.id %}" class="btn-modificar">
+
+                        Modificar
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </article>
+
+        {% endfor %}
+
+    </div>
+
+    {% else %}
+
+    <div class="productos-vacio">
+
+        <h2>No hay productos disponibles</h2>
+
+        <p>Próximamente llegarán nuevos Funkos.</p>
+
+    </div>
+
+    {% endif %}
+
+</section>
+
+{% endblock %}

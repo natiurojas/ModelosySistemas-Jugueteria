@@ -1,0 +1,81 @@
+<!-- El formulario para los productos. lo hice en html y no en python para que sea mas personalizable -->
+{% extends 'Base.html' %}
+{% load static %}
+
+{% block section_title %}
+  Agregar Producto
+{% endblock %}
+
+{% block content %}
+  <div class="form">
+    <div class="form-header">
+      {% if producto %}
+        <!-- Texto que aparece cuando estas modificando un producto  -->
+        <h1>Modificar Producto</h1>
+        <p>Modifica un producto</p>
+      {% else %}
+        <!-- Texto que aparece cuando estas agregando un producto -->
+        <h1>Agregar Producto</h1>
+        <p>Añade un nuevo producto</p>
+      {% endif %}
+    </div>
+    <form method="post" enctype="multipart/form-data" class="form-prod">
+      {% csrf_token %}
+      <div class="form-grid">
+        <!--  Atributos del Producto.
+                 Para cada atributo de un Producto podes usar la siguiente estructura:
+
+                 <div class="form-elemento">
+                    <label> * Nombre de atributo * </label>
+                    <input type="text" name=" * Nombre de atributo * " required>
+                 </div>
+
+                 pero si vos queres, podes hacerlo diferente.
+             -->
+        <!-- Nombre -->
+        <div class="form-elemento">
+          <label>Nombre</label>
+          <input type="text" name="nombre" value="{{producto.nombre}}" required />
+        </div>
+        <!-- Descripcion -->
+        <div class="form-elemento">
+          <label>Descripcion</label>
+          <textarea name="descripcion" required>{{producto.descripcion}}</textarea>
+        </div>
+        <!-- Precio -->
+        <div class="form-elemento">
+          <label>Precio</label>
+          <div class="form-precio">
+            <a class>$</a>
+            <input type="number" step="0.01" name="precio" value="{{producto.precio}}" required/>
+          </div>
+        </div>
+        <div class="form-elemento">
+            <label>Stock</label>
+            <input type="number" name="stock" value="{{producto.stock}}" min="0" required>
+        </div>
+        <div class="form-elemento">
+            <label>Imagen</label>
+            <input type="file" name="imagen">
+        </div>
+      </div>
+      <div class="form-botones">
+        <!-- Botones -->
+        {% if producto %}
+          <!-- Botones que aparecen cuando estas modificando el producto -->
+          <button type="submit">Editar Producto</button>
+          <!-- Boton de eliminar -->
+          {% if perms.Api.delete_producto %}
+            <button name="eliminar" type="submit">Eliminar</button>
+          {% else %}
+            <button name="eliminar" type="submit" disabled>Eliminar</button>
+          {% endif %}
+        {% else %}
+          <!-- Botones que aparecen cuando estas añadiendo un producto -->
+          <button type="submit">Añadir Producto</button>
+          <a href="{% url 'Productos' %}">Cancelar</a>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+{% endblock %}

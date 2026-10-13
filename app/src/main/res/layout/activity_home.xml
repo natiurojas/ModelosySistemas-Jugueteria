@@ -396,73 +396,7 @@
             <!-- CLIENTES                          -->
             <!-- ================================= -->
 
-            <androidx.cardview.widget.CardView
 
-                android:id="@+id/cardClients"
-
-                android:layout_width="match_parent"
-                android:layout_height="102dp"
-
-                android:layout_marginTop="13dp"
-
-                app:cardBackgroundColor="#F0F6FA"
-                app:cardCornerRadius="13dp"
-                app:cardElevation="0dp">
-
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-
-                    android:paddingStart="28dp"
-                    android:paddingEnd="20dp">
-
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-
-                            android:text="Clientes"
-                            android:textColor="#27344A"
-                            android:textSize="16sp" />
-
-
-                        <TextView
-                            android:id="@+id/txtClients"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-
-                            android:layout_marginTop="5dp"
-
-                            android:text="82"
-                            android:textColor="#27344A"
-                            android:textSize="27sp"
-                            android:textStyle="bold" />
-
-                    </LinearLayout>
-
-
-                    <ImageView
-                        android:layout_width="65dp"
-                        android:layout_height="65dp"
-
-                        android:src="@drawable/ic_clients"
-                        android:contentDescription="@null" />
-
-                </LinearLayout>
-
-            </androidx.cardview.widget.CardView>
 
         </LinearLayout>
 

@@ -1,7 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
-    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -48,6 +47,7 @@ dependencies {
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.tracing.perfetto.handshake)
     implementation(libs.material)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
@@ -58,15 +58,11 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation("com.github.bumptech.glide:glide:5.0.7")
     implementation("androidx.recyclerview:recyclerview:1.4.0")
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
-    implementation("androidx.credentials:credentials-play-services-auth:1.6.0")
-    implementation("androidx.credentials:credentials:1.6.0")
-    implementation("com.google.android.libraries.identity.googleid:googleid:1.1.1")
-    implementation("com.google.android.gms:play-services-auth:21.6.0")
     implementation("com.google.android.material:material:1.14.0")
 
-    implementation(platform("com.google.firebase:firebase-bom:34.19.0"))
 
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-firestore")
 }

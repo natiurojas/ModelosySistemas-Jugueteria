@@ -1,0 +1,15 @@
+{% extends "Base.html" %}
+{% load static %}
+
+{% block section_title %}Iniciar sesión{% endblock %}
+
+{% block content %}
+<div class="contenedor_login">
+    <form action="" method="post">
+        {{ form.as_p }}
+        {% csrf_token %}
+        <input type="submit" value="Ingresar">
+        <a href="{% url 'Home' %}" class="btn-volver">Volver al inicio</a>
+    </form>
+</div>
+{% endblock %}
