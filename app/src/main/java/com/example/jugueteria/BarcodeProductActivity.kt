@@ -6,6 +6,8 @@ import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatButton
+import androidx.appcompat.widget.AppCompatImageButton
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -17,7 +19,7 @@ class BarcodeProductActivity : AppCompatActivity() {
         ApiClient.restore(this)
         val code = findViewById<EditText>(R.id.edtBarcode)
         val result = findViewById<TextView>(R.id.txtBarcodeResult)
-        findViewById<Button>(R.id.btnFindBarcode).setOnClickListener {
+        findViewById<AppCompatButton>(R.id.btnFindBarcode).setOnClickListener {
             val value = code.text.toString().trim()
             if (value.isBlank()) { code.error = "Ingresá o escaneá un código"; return@setOnClickListener }
             findViewById<Button>(R.id.btnFindBarcode).isEnabled = false
@@ -41,6 +43,6 @@ class BarcodeProductActivity : AppCompatActivity() {
                 }
             })
         }
-        findViewById<Button>(R.id.btnBarcodeBack).setOnClickListener { finish() }
+        findViewById<AppCompatImageButton>(R.id.btnBarcodeBack).setOnClickListener { finish() }
     }
 }

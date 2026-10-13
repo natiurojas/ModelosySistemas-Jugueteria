@@ -47,6 +47,12 @@
             android:windowSoftInputMode="adjustResize" />
         <activity android:name=".BarcodeProductActivity" android:exported="false" />
         <activity android:name=".AdminActivity" android:exported="false" />
+        <activity android:name=".UsersActivity" android:exported="false" />
+        <activity android:name=".UserEditActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".OfficeActivity" android:exported="false" />
+        <activity android:name=".OfficeEditActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".CashboxActivity" android:exported="false" />
+        <activity android:name=".CashboxEditActivity" android:exported="false" android:windowSoftInputMode="adjustResize" />
         <activity
             android:name=".AddEditProductActivity"
             android:exported="false"

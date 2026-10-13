@@ -2,6 +2,7 @@ package com.example.jugueteria
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -29,7 +30,7 @@ class HomeActivity : AppCompatActivity() {
     private lateinit var navSales: LinearLayout
     private lateinit var navProducts: LinearLayout
     private lateinit var navInvoice: LinearLayout
-
+    private lateinit var navAdmin: LinearLayout
     private lateinit var btnAdd: ImageButton
     private lateinit var btnMenu: ImageButton
 
@@ -100,6 +101,9 @@ class HomeActivity : AppCompatActivity() {
 
         navInvoice =
             findViewById(R.id.navInvoice)
+
+        navAdmin =
+            findViewById(R.id.navAdmin)
 
         btnAdd =
             findViewById(R.id.btnAdd)
@@ -201,6 +205,16 @@ class HomeActivity : AppCompatActivity() {
             finish()
         }
 
+        navAdmin.setOnClickListener {
+            openActivity(
+                AdminActivity::class.java
+            )
+            finish()
+        }
+        if(!isAdmin()) {
+            navAdmin.visibility = View.GONE
+        }
+
         // Botón +
         btnAdd.setOnClickListener {
 
@@ -245,6 +259,13 @@ class HomeActivity : AppCompatActivity() {
             finish()
         }
     }
+
+    private fun isAdmin(): Boolean {
+        val prefs = getSharedPreferences("jugueteria", MODE_PRIVATE)
+        val role = prefs.getString("role", "cajero")
+        return role == "administrador"
+    }
+
 
     // =====================================
     // ABRIR ACTIVITY

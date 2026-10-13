@@ -262,19 +262,19 @@
                 android:layout_width="0dp"
                 android:layout_height="75dp"
 
-                android:background="#FFFDF8"
-                android:elevation="8dp"
-
+                android:orientation="horizontal"
                 android:gravity="center_vertical"
 
-                android:orientation="horizontal"
+                android:background="#FFFDF8"
+
+                android:elevation="8dp"
 
                 android:paddingStart="8dp"
                 android:paddingEnd="8dp"
 
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent">
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
 
                 <!-- INICIO -->
@@ -286,19 +286,19 @@
 
                     android:layout_weight="1"
 
-                    android:clickable="true"
-                    android:focusable="true"
-
+                    android:orientation="vertical"
                     android:gravity="center"
-                    android:orientation="vertical">
+
+                    android:clickable="true"
+                    android:focusable="true">
 
 
                     <ImageView
                         android:layout_width="27dp"
                         android:layout_height="27dp"
 
-                        android:contentDescription="Inicio"
-                        android:src="@drawable/ic_home" />
+                        android:src="@drawable/ic_home"
+                        android:contentDescription="Inicio" />
 
 
                     <TextView
@@ -321,19 +321,19 @@
 
                     android:layout_weight="1"
 
-                    android:clickable="true"
-                    android:focusable="true"
-
+                    android:orientation="vertical"
                     android:gravity="center"
-                    android:orientation="vertical">
+
+                    android:clickable="true"
+                    android:focusable="true">
 
 
                     <ImageView
                         android:layout_width="27dp"
                         android:layout_height="27dp"
 
-                        android:contentDescription="Ventas"
-                        android:src="@drawable/ic_cart" />
+                        android:src="@drawable/ic_cart"
+                        android:contentDescription="Ventas" />
 
 
                     <TextView
@@ -356,7 +356,8 @@
 
                     android:layout_weight="1"
 
-                    android:gravity="center">
+                    android:gravity="center"
+                    android:visibility="gone">
 
 
                     <ImageButton
@@ -382,19 +383,19 @@
 
                     android:layout_weight="1"
 
-                    android:clickable="true"
-                    android:focusable="true"
-
+                    android:orientation="vertical"
                     android:gravity="center"
-                    android:orientation="vertical">
+
+                    android:clickable="true"
+                    android:focusable="true">
 
 
                     <ImageView
                         android:layout_width="27dp"
                         android:layout_height="27dp"
 
-                        android:contentDescription="Productos"
-                        android:src="@drawable/ic_products" />
+                        android:src="@drawable/ic_products"
+                        android:contentDescription="Productos" />
 
 
                     <TextView
@@ -417,11 +418,11 @@
 
                     android:layout_weight="1"
 
-                    android:clickable="true"
-                    android:focusable="true"
-
+                    android:orientation="vertical"
                     android:gravity="center"
-                    android:orientation="vertical">
+
+                    android:clickable="true"
+                    android:focusable="true">
 
 
                     <ImageView
@@ -437,6 +438,38 @@
                         android:layout_height="wrap_content"
 
                         android:text="Facturas"
+                        android:textColor="#27344A"
+                        android:textSize="11sp" />
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/navAdmin"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+
+                    android:layout_weight="1"
+
+                    android:orientation="vertical"
+                    android:gravity="center"
+
+                    android:clickable="true"
+                    android:focusable="true">
+
+
+                    <ImageView
+                        android:layout_width="27dp"
+                        android:layout_height="27dp"
+
+                        android:contentDescription="Más"
+                        android:src="@drawable/ic_admin" />
+
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+
+                        android:text="Administracion"
                         android:textColor="#27344A"
                         android:textSize="11sp" />
 

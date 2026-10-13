@@ -5,8 +5,8 @@ from .views import *
 from rest_framework import routers
 
 router = routers.DefaultRouter()
-router.register('carrito',ViewCarrito)
-router.register("promociones", ViewPromociones)
+#router.register('carrito',ViewCarrito)
+#router.register("promociones", ViewPromociones)
 
 urlpatterns = [
     path('', Home, name="Home"),
@@ -29,4 +29,10 @@ urlpatterns = [
     path("api/admin/usuarios/", AdminUsuariosView.as_view(), name="admin_usuarios"),
     path("api/admin/sucursales/", AdminSucursalesView.as_view(), name="admin_sucursales"),
     path("api/admin/cajas/", AdminCajasView.as_view(), name="admin_cajas"),
+]
+from .views import AdminUsuarioDetalleView, AdminSucursalDetalleView, AdminCajaDetalleView
+urlpatterns += [
+    path("api/admin/usuarios/<int:pk>/", AdminUsuarioDetalleView.as_view(), name="admin_usuario_detalle"),
+    path("api/admin/sucursales/<int:pk>/", AdminSucursalDetalleView.as_view(), name="admin_sucursal_detalle"),
+    path("api/admin/cajas/<int:pk>/", AdminCajaDetalleView.as_view(), name="admin_caja_detalle"),
 ]
