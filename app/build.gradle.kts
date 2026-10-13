@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    
 }
 
 android {
@@ -8,6 +9,7 @@ android {
     compileSdk {
         version = release(37)
     }
+
 
     defaultConfig {
         applicationId = "com.example.jugueteria"
