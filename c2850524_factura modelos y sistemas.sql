@@ -57105,6 +57105,241 @@ ALTER TABLE `voucher_aplicaciones`
 --
 ALTER TABLE `voucher_pagos`
   ADD CONSTRAINT `fk_vp_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`);
+
+-- --------------------------------------------------------
+-- Entidades agregadas para coherencia con el DER (Tarea 7)
+-- --------------------------------------------------------
+
+--
+-- Estructura de tabla para la tabla `ventas`
+--
+
+CREATE TABLE IF NOT EXISTS `ventas` (
+  `id` int(11) NOT NULL,
+  `factura_id` int(11) NOT NULL,
+  `monto_pagado` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `vuelto` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `prepagas`
+--
+
+CREATE TABLE IF NOT EXISTS `prepagas` (
+  `id` int(11) NOT NULL,
+  `numero` varchar(30) DEFAULT NULL,
+  `monto` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `estado` enum('EMITIDO','USADO','ANULADO') NOT NULL DEFAULT 'EMITIDO',
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `detalle_prepaga`
+--
+
+CREATE TABLE IF NOT EXISTS `detalle_prepaga` (
+  `id` int(11) NOT NULL,
+  `prepaga_id` int(11) NOT NULL,
+  `venta_id` int(11) NOT NULL,
+  `monto_usado` decimal(12,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `detalle_voucher`
+--
+
+CREATE TABLE IF NOT EXISTS `detalle_voucher` (
+  `id` int(11) NOT NULL,
+  `voucher_id` int(11) NOT NULL,
+  `venta_id` int(11) NOT NULL,
+  `monto` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `fecha` datetime DEFAULT current_timestamp(),
+  `tipo` enum('emision','aplicacion') NOT NULL DEFAULT 'emision',
+  `diferencia` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `observaciones` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `asignacion_cajas`
+--
+
+CREATE TABLE IF NOT EXISTS `asignacion_cajas` (
+  `id` int(11) NOT NULL,
+  `caja_id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `fecha_asignacion` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `autorizacion_pagos`
+--
+
+CREATE TABLE IF NOT EXISTS `autorizacion_pagos` (
+  `id` int(11) NOT NULL,
+  `caja_id` int(11) NOT NULL,
+  `venta_id` int(11) NOT NULL,
+  `monto_inicial` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `monto_final` decimal(12,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `eliminacion_facturas`
+--
+
+CREATE TABLE IF NOT EXISTS `eliminacion_facturas` (
+  `id` int(11) NOT NULL,
+  `factura_id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `informe_ganancias`
+--
+
+CREATE TABLE IF NOT EXISTS `informe_ganancias` (
+  `id` int(11) NOT NULL,
+  `fecha_desde` date DEFAULT NULL,
+  `fecha_hasta` date DEFAULT NULL,
+  `ganancia_neta` decimal(12,2) NOT NULL DEFAULT 0.00
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `notas_credito`
+--
+
+CREATE TABLE IF NOT EXISTS `notas_credito` (
+  `id` int(11) NOT NULL,
+  `factura_id` int(11) NOT NULL,
+  `usuario_id` int(11) NOT NULL,
+  `monto` decimal(12,2) NOT NULL DEFAULT 0.00,
+  `fecha` datetime DEFAULT current_timestamp(),
+  `observaciones` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Estructura de tabla para la tabla `api_conexiones`
+--
+
+CREATE TABLE IF NOT EXISTS `api_conexiones` (
+  `id` int(11) NOT NULL,
+  `estado` varchar(50) DEFAULT NULL,
+  `observaciones` varchar(255) DEFAULT NULL,
+  `fecha` datetime DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Indices de las tablas agregadas por el DER
+--
+
+ALTER TABLE `ventas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_ventas_factura` (`factura_id`);
+
+ALTER TABLE `prepagas`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `detalle_prepaga`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_detprepaga_prepaga` (`prepaga_id`),
+  ADD KEY `fk_detprepaga_venta` (`venta_id`);
+
+ALTER TABLE `detalle_voucher`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_detvoucher_voucher` (`voucher_id`),
+  ADD KEY `fk_detvoucher_venta` (`venta_id`);
+
+ALTER TABLE `asignacion_cajas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_asigcajas_caja` (`caja_id`),
+  ADD KEY `fk_asigcajas_usuario` (`usuario_id`);
+
+ALTER TABLE `autorizacion_pagos`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_autopagos_caja` (`caja_id`),
+  ADD KEY `fk_autopagos_venta` (`venta_id`);
+
+ALTER TABLE `eliminacion_facturas`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_elimfact_factura` (`factura_id`),
+  ADD KEY `fk_elimfact_usuario` (`usuario_id`);
+
+ALTER TABLE `informe_ganancias`
+  ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `notas_credito`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `fk_notacredito_factura` (`factura_id`),
+  ADD KEY `fk_notacredito_usuario` (`usuario_id`);
+
+ALTER TABLE `api_conexiones`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- AUTO_INCREMENT de las tablas agregadas por el DER
+--
+
+ALTER TABLE `ventas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `prepagas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `detalle_prepaga`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `detalle_voucher`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `asignacion_cajas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `autorizacion_pagos`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `eliminacion_facturas`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `informe_ganancias`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `notas_credito`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+ALTER TABLE `api_conexiones`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- Filtros para las tablas agregadas por el DER
+--
+
+ALTER TABLE `ventas`
+  ADD CONSTRAINT `fk_ventas_factura` FOREIGN KEY (`factura_id`) REFERENCES `facturas` (`id`);
+
+ALTER TABLE `detalle_prepaga`
+  ADD CONSTRAINT `fk_detprepaga_prepaga` FOREIGN KEY (`prepaga_id`) REFERENCES `prepagas` (`id`),
+  ADD CONSTRAINT `fk_detprepaga_venta` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`);
+
+ALTER TABLE `detalle_voucher`
+  ADD CONSTRAINT `fk_detvoucher_voucher` FOREIGN KEY (`voucher_id`) REFERENCES `vouchers` (`id`),
+  ADD CONSTRAINT `fk_detvoucher_venta` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`);
+
+ALTER TABLE `asignacion_cajas`
+  ADD CONSTRAINT `fk_asigcajas_caja` FOREIGN KEY (`caja_id`) REFERENCES `cajas` (`id`),
+  ADD CONSTRAINT `fk_asigcajas_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
+
+ALTER TABLE `autorizacion_pagos`
+  ADD CONSTRAINT `fk_autopagos_caja` FOREIGN KEY (`caja_id`) REFERENCES `cajas` (`id`),
+  ADD CONSTRAINT `fk_autopagos_venta` FOREIGN KEY (`venta_id`) REFERENCES `ventas` (`id`);
+
+ALTER TABLE `eliminacion_facturas`
+  ADD CONSTRAINT `fk_elimfact_factura` FOREIGN KEY (`factura_id`) REFERENCES `facturas` (`id`),
+  ADD CONSTRAINT `fk_elimfact_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
+
+ALTER TABLE `notas_credito`
+  ADD CONSTRAINT `fk_notacredito_factura` FOREIGN KEY (`factura_id`) REFERENCES `facturas` (`id`),
+  ADD CONSTRAINT `fk_notacredito_usuario` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
