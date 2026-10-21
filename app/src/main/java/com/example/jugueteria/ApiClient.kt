@@ -43,6 +43,9 @@ data class CashRegisterRequest(val sucursal: Int, val nombre: String, val cajero
 data class AdminUserItem(val id: Int, val username: String, val email: String = "", val role: String = "cajero")
 data class OfficeItem(val id: Int, val nombre: String, val domicilio: String, val razon_social: String)
 data class CashboxItem(val id: Int, val sucursal: Int, val nombre: String, val cajero: Int? = null, val cajero_nombre: String? = null, val hora_apertura: String = "09:00:00", val hora_cierre: String = "18:00:00")
+data class ManagerCashbox(val id: Int, val nombre: String, val hora_apertura: String, val hora_cierre: String)
+data class ManagerBranchConfig(val sucursal_id: Int, val sucursal: String, val hora_limite_ventas: String, val cajas: List<ManagerCashbox> = emptyList())
+data class ManagerReport(val tipo: String? = null, val fecha: String? = null, val recaudacion: Double? = null, val ventas: Int? = null, val total_sin_ajuste: Double? = null, val ganancia_estimada: Double? = null, val cantidad: Int? = null, val resultados: List<Map<String, Any?>> = emptyList(), val detail: String? = null)
 
 interface JugueteriaApi {
     @POST("api/register/") fun register(@Body body: Map<String, @JvmSuppressWildcards String>): Call<Map<String, Any>>
@@ -67,4 +70,7 @@ interface JugueteriaApi {
     @DELETE("api/admin/cajas/{id}/") fun deleteCashbox(@Header("Authorization") token: String, @Path("id") id: Int): Call<Void>
     @POST("api/admin/sucursales/") fun createBranch(@Header("Authorization") token: String, @Body body: BranchRequest): Call<ApiMessage>
     @POST("api/admin/cajas/") fun createCashRegister(@Header("Authorization") token: String, @Body body: CashRegisterRequest): Call<ApiMessage>
+    @GET("api/gerente/configuracion/") fun managerConfig(@Header("Authorization") token: String): Call<List<ManagerBranchConfig>>
+    @PATCH("api/gerente/configuracion/") fun updateManagerConfig(@Header("Authorization") token: String, @Body body: Map<String, @JvmSuppressWildcards Any>): Call<ApiMessage>
+    @GET("api/gerente/reportes/") fun managerReport(@Header("Authorization") token: String, @Query("tipo") type: String, @Query("fecha") date: String? = null): Call<ManagerReport>
 }

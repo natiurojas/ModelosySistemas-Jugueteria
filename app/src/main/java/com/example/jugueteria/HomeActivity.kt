@@ -206,13 +206,14 @@ class HomeActivity : AppCompatActivity() {
         }
 
         navAdmin.setOnClickListener {
-            openActivity(
-                AdminActivity::class.java
-            )
+            val target = if (isManager()) ManagerActivity::class.java else AdminActivity::class.java
+            openActivity(target)
             finish()
         }
-        if(!isAdmin()) {
-            navAdmin.visibility = View.GONE
+        if (!canAccessManagement()) navAdmin.visibility = View.GONE
+        else {
+            navAdmin.contentDescription = if (isManager()) "Panel del gerente" else "Panel de administración"
+            (navAdmin.getChildAt(1) as? TextView)?.text = if (isManager()) "Gerencia" else "Administración"
         }
 
         // Botón +
@@ -260,11 +261,9 @@ class HomeActivity : AppCompatActivity() {
         }
     }
 
-    private fun isAdmin(): Boolean {
-        val prefs = getSharedPreferences("jugueteria", MODE_PRIVATE)
-        val role = prefs.getString("role", "cajero")
-        return role == "administrador"
-    }
+    private fun isAdmin(): Boolean = getSharedPreferences("jugueteria", MODE_PRIVATE).getString("role", "cajero") == "administrador"
+    private fun isManager(): Boolean = getSharedPreferences("jugueteria", MODE_PRIVATE).getString("role", "cajero") == "gerente"
+    private fun canAccessManagement(): Boolean = isAdmin() || isManager()
 
 
     // =====================================
@@ -409,13 +408,13 @@ class HomeActivity : AppCompatActivity() {
             .setTitle("Menú")
             .setItems(
                 arrayOf(
-                    "Panel de administración",
+                    if (isManager()) "Panel del gerente" else "Panel de administración",
                     "Cerrar sesión"
                 )
             ) { _, which ->
 
                 when (which) {
-                    0 -> startActivity(Intent(this, AdminActivity::class.java))
+                    0 -> startActivity(Intent(this, if (isManager()) ManagerActivity::class.java else AdminActivity::class.java))
                     1 -> logout()
                 }
             }

@@ -36,3 +36,8 @@ urlpatterns += [
     path("api/admin/sucursales/<int:pk>/", AdminSucursalDetalleView.as_view(), name="admin_sucursal_detalle"),
     path("api/admin/cajas/<int:pk>/", AdminCajaDetalleView.as_view(), name="admin_caja_detalle"),
 ]
+
+urlpatterns += [
+    path("api/gerente/configuracion/", GerenteConfiguracionView.as_view(), name="gerente_configuracion"),
+    path("api/gerente/reportes/", GerenteReportesView.as_view(), name="gerente_reportes"),
+]

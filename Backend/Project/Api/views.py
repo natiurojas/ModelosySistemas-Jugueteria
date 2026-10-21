@@ -249,13 +249,37 @@ def AndroidVentas(request):
         items=request.data.get("items", [])
         if not items: return Response({"detail":"La venta debe incluir productos"}, status=400)
         username=request.user.username
+        # Las tablas de configuración se crean fuera de la transacción de venta.
+        with connection.cursor() as setup_cursor:
+            _ensure_manager_tables(setup_cursor)
         with transaction.atomic():
             with connection.cursor() as cursor:
                 cursor.execute("SELECT id FROM usuarios WHERE usuario=%s AND estado=1 LIMIT 1", [username]); userrow=cursor.fetchone()
                 if not userrow: cursor.execute("SELECT id FROM usuarios WHERE estado=1 ORDER BY id LIMIT 1"); userrow=cursor.fetchone()
-                cursor.execute("SELECT id FROM sucursales ORDER BY id LIMIT 1"); branch=cursor.fetchone()
-                cursor.execute("SELECT id FROM cajas ORDER BY id LIMIT 1"); cash=cursor.fetchone()
+                cursor.execute("SELECT sucursal_id, caja_id FROM usuarios WHERE id=%s", [userrow[0]] if userrow else [0]); assignment=cursor.fetchone()
+                if assignment and assignment[0]:
+                    cursor.execute("SELECT id FROM sucursales WHERE id=%s", [assignment[0]])
+                else:
+                    cursor.execute("SELECT id FROM sucursales ORDER BY id LIMIT 1")
+                branch=cursor.fetchone()
+                if assignment and assignment[1]:
+                    cursor.execute("SELECT id FROM cajas WHERE id=%s", [assignment[1]])
+                elif branch:
+                    cursor.execute("SELECT id FROM cajas WHERE sucursal_id=%s ORDER BY id LIMIT 1", [branch[0]])
+                else:
+                    cursor.execute("SELECT id FROM cajas ORDER BY id LIMIT 1")
+                cash=cursor.fetchone()
                 if not userrow or not branch or not cash: return Response({"detail":"El SQL debe contener al menos un usuario, una sucursal y una caja"}, status=400)
+                # Respeta los horarios configurados por Gerencia antes de registrar la venta.
+                current_clock = timezone.localtime(timezone.now(), ARGENTINA_TZ).time().strftime("%H:%M:%S")
+                cursor.execute("SELECT COALESCE(hora_apertura,'09:00:00'), COALESCE(hora_cierre,'18:00:00') FROM caja_horarios WHERE caja_id=%s", [cash[0]])
+                box_hours = cursor.fetchone() or ("09:00:00", "18:00:00")
+                if not (str(box_hours[0]) <= current_clock <= str(box_hours[1])):
+                    return Response({"detail":f"La caja está fuera de su horario de atención ({str(box_hours[0])[:5]} a {str(box_hours[1])[:5]})"}, status=403)
+                cursor.execute("SELECT hora_limite_ventas FROM gerente_configuracion WHERE sucursal_id=%s", [branch[0]])
+                sales_limit = cursor.fetchone()
+                if sales_limit and current_clock > str(sales_limit[0]):
+                    return Response({"detail":f"Se alcanzó la hora límite de ventas ({str(sales_limit[0])[:5]})"}, status=403)
                 normalized=[]; total=0.0
                 for item in items:
                     try: pid=int(item.get("productId")); qty=int(item.get("quantity"))
@@ -432,3 +456,173 @@ class AdminCajaDetalleView(APIView):
             cursor.execute("DELETE FROM caja_horarios WHERE caja_id=%s",[pk]); cursor.execute("DELETE FROM cajas WHERE id=%s",[pk])
             if cursor.rowcount == 0: return Response({"detail":"Caja no encontrada"},status=404)
         return Response(status=204)
+
+# ========================= MODULO GERENTE =========================
+from datetime import datetime, time as datetime_time, timedelta
+from zoneinfo import ZoneInfo
+
+ARGENTINA_TZ = ZoneInfo("America/Argentina/Buenos_Aires")
+UTC_TZ = ZoneInfo("UTC")
+
+def _argentina_day_bounds(day):
+    start = datetime.combine(day, datetime_time.min, tzinfo=ARGENTINA_TZ)
+    end = start + timedelta(days=1)
+    return (start.astimezone(UTC_TZ).replace(tzinfo=None), end.astimezone(UTC_TZ).replace(tzinfo=None))
+from django.utils.dateparse import parse_date
+
+
+def _is_manager(user):
+    perfil = getattr(user, "perfil_sistema", None)
+    return bool(user.is_staff or user.is_superuser or (perfil and perfil.rol == "gerente"))
+
+
+def _manager_required(request):
+    if not request.user.is_authenticated:
+        return Response({"detail": "Autenticación requerida"}, status=401)
+    if not _is_manager(request.user):
+        return Response({"detail": "No tenés permisos para acceder al módulo Gerente"}, status=403)
+    return None
+
+
+def _ensure_manager_tables(cursor):
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS caja_horarios (
+            caja_id INT NOT NULL PRIMARY KEY,
+            hora_apertura TIME NOT NULL DEFAULT '09:00:00',
+            hora_cierre TIME NOT NULL DEFAULT '18:00:00'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS gerente_configuracion (
+            sucursal_id INT NOT NULL PRIMARY KEY,
+            hora_limite_ventas TIME NOT NULL DEFAULT '18:00:00'
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    """)
+
+
+class GerenteConfiguracionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        denied = _manager_required(request)
+        if denied: return denied
+        with connection.cursor() as cursor:
+            _ensure_manager_tables(cursor)
+            cursor.execute("SELECT id, nombre FROM sucursales ORDER BY id")
+            branches = cursor.fetchall()
+            result = []
+            for branch_id, branch_name in branches:
+                cursor.execute("SELECT hora_limite_ventas FROM gerente_configuracion WHERE sucursal_id=%s", [branch_id])
+                config = cursor.fetchone()
+                cursor.execute("""
+                    SELECT c.id, c.nombre, COALESCE(h.hora_apertura,'09:00:00'),
+                           COALESCE(h.hora_cierre,'18:00:00')
+                    FROM cajas c LEFT JOIN caja_horarios h ON h.caja_id=c.id
+                    WHERE c.sucursal_id=%s ORDER BY c.id
+                """, [branch_id])
+                boxes = [{"id":r[0],"nombre":r[1] or "Caja","hora_apertura":str(r[2]),"hora_cierre":str(r[3])} for r in cursor.fetchall()]
+                result.append({"sucursal_id":branch_id,"sucursal":branch_name or "Sucursal",
+                               "hora_limite_ventas":str(config[0]) if config else "18:00:00","cajas":boxes})
+        return Response(result)
+
+    def patch(self, request):
+        denied = _manager_required(request)
+        if denied: return denied
+        try: branch_id = int(request.data.get("sucursal_id"))
+        except (TypeError, ValueError): return Response({"detail":"Sucursal inválida"}, status=400)
+        limit = request.data.get("hora_limite_ventas")
+        if limit is not None and parse_time(str(limit)) is None:
+            return Response({"detail":"La hora límite debe tener formato HH:mm"}, status=400)
+        with connection.cursor() as cursor:
+            _ensure_manager_tables(cursor)
+            cursor.execute("SELECT id FROM sucursales WHERE id=%s", [branch_id])
+            if not cursor.fetchone(): return Response({"detail":"Sucursal no encontrada"}, status=404)
+            if limit is not None:
+                cursor.execute("INSERT INTO gerente_configuracion(sucursal_id,hora_limite_ventas) VALUES(%s,%s) ON DUPLICATE KEY UPDATE hora_limite_ventas=VALUES(hora_limite_ventas)", [branch_id, str(limit)])
+            box_id = request.data.get("caja_id")
+            if box_id is not None:
+                try: box_id = int(box_id)
+                except (TypeError, ValueError): return Response({"detail":"Caja inválida"}, status=400)
+                opening = str(request.data.get("hora_apertura", ""))
+                closing = str(request.data.get("hora_cierre", ""))
+                if parse_time(opening) is None or parse_time(closing) is None:
+                    return Response({"detail":"Las horas de apertura y cierre deben tener formato HH:mm"}, status=400)
+                if opening >= closing:
+                    return Response({"detail":"La apertura debe ser anterior al cierre"}, status=400)
+                cursor.execute("SELECT id FROM cajas WHERE id=%s AND sucursal_id=%s", [box_id, branch_id])
+                if not cursor.fetchone(): return Response({"detail":"La caja no pertenece a la sucursal"}, status=404)
+                cursor.execute("INSERT INTO caja_horarios(caja_id,hora_apertura,hora_cierre) VALUES(%s,%s,%s) ON DUPLICATE KEY UPDATE hora_apertura=VALUES(hora_apertura),hora_cierre=VALUES(hora_cierre)", [box_id, opening, closing])
+        return Response({"detail":"Configuración guardada"})
+
+
+class GerenteReportesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        denied = _manager_required(request)
+        if denied: return denied
+        tipo = (request.query_params.get("tipo") or "").strip().lower()
+        fecha_text = request.query_params.get("fecha")
+        desde_text = request.query_params.get("desde")
+        hasta_text = request.query_params.get("hasta")
+        fecha = parse_date(fecha_text) if fecha_text else None
+        desde = parse_date(desde_text) if desde_text else None
+        hasta = parse_date(hasta_text) if hasta_text else None
+        if fecha_text and not fecha: return Response({"detail":"Fecha inválida (YYYY-MM-DD)"}, status=400)
+        if desde_text and not desde: return Response({"detail":"Fecha desde inválida"}, status=400)
+        if hasta_text and not hasta: return Response({"detail":"Fecha hasta inválida"}, status=400)
+        if desde and hasta and desde > hasta: return Response({"detail":"El rango de fechas es inválido"}, status=400)
+        date_filter = ""
+        params = []
+        if fecha:
+            start_at, end_at = _argentina_day_bounds(fecha)
+            date_filter = " AND f.fecha >= %s AND f.fecha < %s"
+            params.extend([start_at, end_at])
+        else:
+            if desde:
+                start_at, _ = _argentina_day_bounds(desde)
+                date_filter += " AND f.fecha >= %s"; params.append(start_at)
+            if hasta:
+                _, end_at = _argentina_day_bounds(hasta)
+                date_filter += " AND f.fecha < %s"; params.append(end_at)
+
+        with connection.cursor() as cursor:
+            if tipo == "cajas":
+                cursor.execute("""
+                    SELECT f.id, f.fecha, f.caja_id, COALESCE(c.nombre,'Caja'),
+                           f.usuario_id, COALESCE(u.nombre,'Sin usuario'), f.total, f.tipo
+                    FROM facturas f LEFT JOIN cajas c ON c.id=f.caja_id
+                    LEFT JOIN usuarios u ON u.id=f.usuario_id
+                    WHERE f.tipo='PV' AND f.cobrada=1 """ + date_filter + " ORDER BY f.fecha DESC, f.id DESC LIMIT 1000", params)
+                rows = [{"venta_id":r[0],"fecha":r[1].isoformat(sep=" ") if r[1] else "","caja_id":r[2],"caja":r[3],"usuario_id":r[4],"usuario":r[5],"total":float(r[6] or 0),"tipo":r[7]} for r in cursor.fetchall()]
+                return Response({"tipo":tipo,"resultados":rows,"cantidad":len(rows)})
+
+            if tipo == "productos":
+                cursor.execute("""
+                    SELECT d.producto_id, COALESCE(p.descripcion,'Producto'), SUM(d.cantidad),
+                           SUM(d.subtotal), SUM(d.cantidad * COALESCE(p.precio_costo,0))
+                    FROM factura_detalle d INNER JOIN facturas f ON f.id=d.factura_id
+                    LEFT JOIN productos p ON p.id=d.producto_id
+                    WHERE f.tipo='PV' AND f.cobrada=1 """ + date_filter + " GROUP BY d.producto_id, p.descripcion ORDER BY SUM(d.cantidad) DESC LIMIT 1000", params)
+                rows = [{"producto_id":r[0],"producto":r[1],"cantidad":int(r[2] or 0),"total_vendido":float(r[3] or 0),"costo_estimado":float(r[4] or 0)} for r in cursor.fetchall()]
+                return Response({"tipo":tipo,"resultados":rows,"cantidad":len(rows)})
+
+            if tipo in ("recaudacion", "ganancia"):
+                if not fecha: return Response({"detail":"Este informe requiere el parámetro fecha=YYYY-MM-DD"}, status=400)
+                start_at, end_at = _argentina_day_bounds(fecha)
+                cursor.execute("""
+                    SELECT COALESCE(SUM(f.total),0), COUNT(*),
+                           COALESCE(SUM(COALESCE(f.total_sin_ajuste,f.total)),0)
+                    FROM facturas f WHERE f.tipo='PV' AND f.cobrada=1 AND f.fecha >= %s AND f.fecha < %s
+                """, [start_at, end_at])
+                total, count, gross = cursor.fetchone()
+                cursor.execute("""
+                    SELECT COALESCE(SUM(d.subtotal - (d.cantidad * COALESCE(p.precio_costo,0))),0)
+                    FROM factura_detalle d INNER JOIN facturas f ON f.id=d.factura_id
+                    LEFT JOIN productos p ON p.id=d.producto_id
+                    WHERE f.tipo='PV' AND f.cobrada=1 AND f.fecha >= %s AND f.fecha < %s
+                """, [start_at, end_at])
+                profit = float(cursor.fetchone()[0] or 0)
+                return Response({"tipo":tipo,"fecha":fecha.isoformat(),"recaudacion":float(total or 0),"ventas":int(count or 0),"total_sin_ajuste":float(gross or 0),"ganancia_estimada":profit if tipo=="ganancia" else None})
+
+        return Response({"detail":"Tipo de informe inválido. Usá cajas, productos, recaudacion o ganancia"}, status=400)

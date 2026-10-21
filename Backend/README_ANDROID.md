@@ -45,3 +45,18 @@ El panel se divide en `AdminActivity`, `UsersActivity` / `UserEditActivity`, `Of
 - `GET/POST api/admin/cajas/`, `PATCH/DELETE api/admin/cajas/<id>/`
 
 Para acceder a estas rutas, el token debe pertenecer a un usuario administrador (`is_staff` / `is_superuser`). Las cajas asocian el usuario de Django con el usuario operativo de la base SQL mediante el nombre de usuario.
+
+
+## Módulo Gerente
+
+El módulo Gerente se abre al iniciar sesión con un usuario cuyo perfil Django tenga el rol `gerente` (o con un administrador). Incluye:
+
+- `GET/PATCH /api/gerente/configuracion/`: consulta sucursales, horarios de cajas y límite de ventas; permite modificar el horario de una caja o el límite de ventas de la sucursal.
+- `GET /api/gerente/reportes/?tipo=cajas`: histórico de ventas por caja.
+- `GET /api/gerente/reportes/?tipo=productos`: histórico de productos vendidos y cantidades.
+- `GET /api/gerente/reportes/?tipo=recaudacion&fecha=AAAA-MM-DD`: recaudación del día.
+- `GET /api/gerente/reportes/?tipo=ganancia&fecha=AAAA-MM-DD`: ganancia estimada del día, calculada como subtotal vendido menos el costo registrado de los productos.
+
+Los informes de históricos admiten `desde` y `hasta` con formato `AAAA-MM-DD`. Los endpoints requieren `Authorization: Token <token>` y el rol `gerente` o `administrador`. Las fechas de los informes y las validaciones horarias se interpretan en `America/Argentina/Buenos_Aires`. Las ventas nuevas respetan el horario de la caja asignada al usuario y la hora límite de ventas configurada para su sucursal.
+
+Después de actualizar el proyecto, ejecutar `python manage.py migrate` para crear las tablas `caja_horarios` y `gerente_configuracion`.
