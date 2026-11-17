@@ -107,6 +107,7 @@ class BarcodeProductActivity : AppCompatActivity() {
         val executor = cameraExecutor ?: Executors.newSingleThreadExecutor().also { cameraExecutor = it }
         val cameraFuture = ProcessCameraProvider.getInstance(this)
         cameraFuture.addListener({
+            if (isDestroyed) return@addListener
             try {
                 bindScanner(cameraFuture.get(), executor)
             } catch (e: Exception) {
