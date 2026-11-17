@@ -29,7 +29,7 @@ object ApiClient {
     }).create(JugueteriaApi::class.java)
 }
 
-data class ApiLoginRequest(val username: String, val password: String)
+data class ApiLoginRequest(val email: String, val password: String)
 data class ApiLoginResponse(val token: String? = null, val usuario: String? = null, val role: String? = null, val error: String? = null)
 data class ApiProduct(val id: Int, val nombre: String, val descripcion: String = "", val precio: Double, val stock: Int, val codigo_barras: String? = null, val categoria: String? = null)
 data class ApiMessage(val detail: String? = null, val error: String? = null, val id: Int? = null, val mensaje: String? = null)

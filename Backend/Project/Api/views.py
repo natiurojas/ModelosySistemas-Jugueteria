@@ -120,15 +120,20 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
-        # El registro usa email; se acepta `email` o `username` (compatibilidad
-        # con clientes existentes que envían el correo en el campo username).
-        identifier = str(request.data.get("email") or request.data.get("username") or "").strip()
+        # El login se hace solo con email. El campo `username` ya no se acepta.
+        email = str(request.data.get("email") or "").strip().lower()
         password = request.data.get("password")
-        user = authenticate(username=identifier, password=password)
-        if not user and identifier:
-            by_email = User.objects.filter(email__iexact=identifier).first()
-            if by_email:
-                user = authenticate(username=by_email.username, password=password)
+        if not email:
+            return Response(
+                {"error": "El email es obligatorio"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        user_by_email = User.objects.filter(email__iexact=email).first()
+        user = authenticate(username=user_by_email.username, password=password) if user_by_email else None
+        if not user:
+            # Compatibilidad con cuentas creadas antes del registro por email,
+            # donde el correo se guardaba también como username.
+            user = authenticate(username=email, password=password)
         if not user:
             return Response(
                 {"error":"Credenciales incorrectas"},

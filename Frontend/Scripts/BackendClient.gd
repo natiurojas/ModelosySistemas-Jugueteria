@@ -115,16 +115,16 @@ func delete(endpoint: String, query: Dictionary = {}) -> Dictionary:
 # AUTENTICACIÓN
 # -----------------------------------------------------------------------------
 
-func login(user: String, password: String) -> Dictionary:
+func login(email: String, password: String) -> Dictionary:
 	var response := await post("/api/login/", {
-		"username": user,
+		"email": email,
 		"password": password
 	})
 
 	if response.ok and response.data is Dictionary:
 		var data: Dictionary = response.data
 		token = str(data.get("token", ""))
-		username = str(data.get("usuario", user))
+		username = str(data.get("usuario", email))
 		role = str(data.get("role", ""))
 		_save_session()
 		token_changed.emit(token)

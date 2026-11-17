@@ -110,7 +110,7 @@ class MainActivity : AppCompatActivity() {
         if (email.isBlank()) {
 
             edtUsername.error =
-                "Ingresá tu usuario"
+                "Ingresá tu email"
 
             edtUsername.requestFocus()
 

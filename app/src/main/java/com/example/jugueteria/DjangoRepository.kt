@@ -19,7 +19,7 @@ class DjangoRepository(private val activity: ComponentActivity) {
     fun getCurrentUser(): Any? = if (token().isBlank()) null else getCurrentUserId()
 
     fun registerWithEmail(email: String, password: String, onFinish: (Boolean, Exception?) -> Unit) {
-        ApiClient.api.register(mapOf("email" to email, "password" to password)).enqueue(object : Callback<Map<String, Any>> {
+        ApiClient.api.register(mapOf("username" to email, "email" to email, "password" to password)).enqueue(object : Callback<Map<String, Any>> {
             override fun onResponse(call: Call<Map<String, Any>>, response: Response<Map<String, Any>>) { onFinish(response.isSuccessful, if (response.isSuccessful) null else Exception("No se pudo registrar el usuario (${response.code()})")) }
             override fun onFailure(call: Call<Map<String, Any>>, t: Throwable) = onFinish(false, Exception(t.message ?: "Error de conexión"))
         })
