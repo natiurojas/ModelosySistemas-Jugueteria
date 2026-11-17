@@ -9,9 +9,9 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
-import java.time.LocalDate
-import java.time.YearMonth
-import java.time.format.DateTimeFormatter
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Locale
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -272,6 +272,13 @@ class InvoicesActivity : AppCompatActivity() {
         btnPickDate.setOnClickListener { showDatePicker() }
     }
 
+    private fun patternFor(period: String?): String? = when (period) {
+        "dia" -> "yyyy-MM-dd"
+        "mes" -> "yyyy-MM"
+        "anio" -> "yyyy"
+        else -> null
+    }
+
     private fun setPeriod(period: String?) {
 
         salesPeriod = period
@@ -280,12 +287,8 @@ class InvoicesActivity : AppCompatActivity() {
             txtSelectedPeriod.text = "Sin filtro"
             btnPickDate.visibility = View.GONE
         } else {
-            val today = LocalDate.now()
-            salesFilterValue = when (period) {
-                "dia" -> today.toString()
-                "mes" -> YearMonth.from(today).toString()
-                else -> today.year.toString()
-            }
+            val format = SimpleDateFormat(patternFor(period) ?: "yyyy-MM-dd", Locale.US)
+            salesFilterValue = format.format(Calendar.getInstance().time)
             updatePeriodLabel()
             btnPickDate.visibility = View.VISIBLE
         }
@@ -295,36 +298,39 @@ class InvoicesActivity : AppCompatActivity() {
     private fun updatePeriodLabel() {
         val value = salesFilterValue ?: return
         txtSelectedPeriod.text = when (salesPeriod) {
-            "dia" -> "Día: " + LocalDate.parse(value).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
-            "mes" -> "Mes: " + YearMonth.parse(value).format(DateTimeFormatter.ofPattern("MM/yyyy"))
+            "dia" -> "Día: " + formatDate(value, "yyyy-MM-dd", "dd/MM/yyyy")
+            "mes" -> "Mes: " + formatDate(value, "yyyy-MM", "MM/yyyy")
             "anio" -> "Año: $value"
             else -> "Sin filtro"
         }
     }
 
+    private fun formatDate(value: String, from: String, to: String): String = try {
+        SimpleDateFormat(to, Locale.US).format(SimpleDateFormat(from, Locale.US).parse(value))
+    } catch (_: Exception) {
+        value
+    }
+
     private fun showDatePicker() {
-        val initial = when (salesPeriod) {
-            "dia" -> salesFilterValue?.let { LocalDate.parse(it) } ?: LocalDate.now()
-            "mes" -> salesFilterValue?.let { YearMonth.parse(it).atDay(1) } ?: LocalDate.now().withDayOfMonth(1)
-            "anio" -> salesFilterValue?.let { LocalDate.of(it.toInt(), 1, 1) } ?: LocalDate.now().withDayOfYear(1)
-            else -> LocalDate.now()
+        val cal = Calendar.getInstance()
+        val pattern = patternFor(salesPeriod)
+        val value = salesFilterValue
+        if (pattern != null && !value.isNullOrBlank()) {
+            try {
+                SimpleDateFormat(pattern, Locale.US).parse(value)?.let { cal.time = it }
+            } catch (_: Exception) { /* se usa la fecha actual */ }
         }
         DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
-                val date = LocalDate.of(year, month + 1, dayOfMonth)
-                salesFilterValue = when (salesPeriod) {
-                    "dia" -> date.toString()
-                    "mes" -> YearMonth.from(date).toString()
-                    "anio" -> date.year.toString()
-                    else -> null
-                }
+                val chosen = Calendar.getInstance().apply { set(year, month, dayOfMonth) }
+                salesFilterValue = SimpleDateFormat(pattern ?: "yyyy-MM-dd", Locale.US).format(chosen.time)
                 updatePeriodLabel()
                 cargarFacturas()
             },
-            initial.year,
-            initial.monthValue - 1,
-            initial.dayOfMonth
+            cal.get(Calendar.YEAR),
+            cal.get(Calendar.MONTH),
+            cal.get(Calendar.DAY_OF_MONTH)
         ).show()
     }
 

@@ -1,8 +1,9 @@
 package com.example.jugueteria
 
 import androidx.activity.ComponentActivity
-import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -127,9 +128,11 @@ class DjangoRepository(private val activity: ComponentActivity) {
     }
     private fun parseSaleDate(raw: String?): Long {
         if (raw.isNullOrBlank()) return 0L
+        val cleaned = raw.replace(' ', 'T').substringBefore('+').substringBefore('Z').substringBefore('.')
         return try {
-            val normalized = raw.replace(' ', 'T').substringBefore('+').substringBefore('Z').substringBefore('.')
-            LocalDateTime.parse(normalized).toInstant(ZoneOffset.UTC).toEpochMilli()
+            val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US)
+            format.timeZone = TimeZone.getTimeZone("UTC")
+            format.parse(cleaned)?.time ?: 0L
         } catch (_: Exception) {
             raw.toLongOrNull() ?: 0L
         }

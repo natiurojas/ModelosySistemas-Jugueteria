@@ -577,7 +577,7 @@ def _sales_period_bounds(query_params):
             datetime.combine(next_year, datetime_time.min, tzinfo=ARGENTINA_TZ),
         )
     else:
-        raise ValueError("Período inválido. Use dia, mes o anio")
+        raise ValueError("Periodo invalido. Use dia, mes o anio")
 
     return " AND fecha >= %s AND fecha < %s", [start, end]
 
