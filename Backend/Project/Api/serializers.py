@@ -1,4 +1,5 @@
 from .models import *
+from django.contrib.auth.models import User
 from rest_framework import serializers
 
 class SerializersProducto(serializers.ModelSerializer):
@@ -26,15 +27,41 @@ class SerializerPromocion(serializers.ModelSerializer):
 
 
 class RegisterSerializer(serializers.ModelSerializer):
+    """Registro público: solo se pide email y contraseña.
+
+    Django exige un `username` único internamente, pero el cliente nunca lo
+    envía. Se genera a partir de la parte local del correo y se asegura
+    que sea único para no chocar con usuarios creados desde el panel admin.
+    """
+    email = serializers.EmailField(required=True)
     password = serializers.CharField(write_only=True)
+
     class Meta:
         model = User
-        fields = ("username","email","password")
-    def create(self, validated_data):
+        fields = ("email", "password")
 
+    def validate_email(self, value):
+        email = value.strip().lower()
+        if User.objects.filter(email__iexact=email).exists():
+            raise serializers.ValidationError("Ya existe un usuario registrado con ese correo.")
+        return email
+
+    @staticmethod
+    def _username_from_email(email):
+        base = (email.split("@", 1)[0].strip() or "usuario")[:150]
+        username = base
+        suffix = 1
+        while User.objects.filter(username=username).exists():
+            tail = str(suffix)
+            username = f"{base[:150 - len(tail)]}{tail}"
+            suffix += 1
+        return username
+
+    def create(self, validated_data):
+        email = validated_data["email"]
         user = User.objects.create_user(
-            username=validated_data["username"],
-            email=validated_data["email"],
+            username=self._username_from_email(email),
+            email=email,
             password=validated_data["password"]
         )
         Carrito.objects.create(user=user)

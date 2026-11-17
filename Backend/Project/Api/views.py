@@ -1,4 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.models import User
 from .models import *
 from django.contrib.auth.decorators import permission_required, login_required
 from .serializers import *
@@ -119,12 +120,15 @@ class RegisterView(generics.CreateAPIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
     def post(self, request):
-        username = request.data.get("username")
+        # El registro usa email; se acepta `email` o `username` (compatibilidad
+        # con clientes existentes que envían el correo en el campo username).
+        identifier = str(request.data.get("email") or request.data.get("username") or "").strip()
         password = request.data.get("password")
-        user = authenticate(
-            username=username,
-            password=password
-        )
+        user = authenticate(username=identifier, password=password)
+        if not user and identifier:
+            by_email = User.objects.filter(email__iexact=identifier).first()
+            if by_email:
+                user = authenticate(username=by_email.username, password=password)
         if not user:
             return Response(
                 {"error":"Credenciales incorrectas"},
@@ -137,7 +141,7 @@ class LoginView(APIView):
             role = "administrador" if user.is_staff or user.is_superuser else "cajero"
         return Response({
             "mensaje": "Login correcto",
-            "usuario": user.username,
+            "usuario": user.email or user.username,
             "token": token.key,
             "role": role
         })

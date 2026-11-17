@@ -11,7 +11,8 @@
 En Android, colocar la IP LAN de la PC que ejecuta Django y el puerto `8000` en la pantalla inicial. En el emulador Android se puede usar `10.0.2.2:8000`; en un teléfono físico se debe usar la IP local de la PC y ambos dispositivos deben estar en la misma red.
 
 ## Endpoints incorporados
-- `POST /api/login/`: usuario/contraseña, devuelve token y rol.
+- `POST /api/register/`: registro con `email` y `password` (no se envía `username`; el nombre de usuario interno se deriva del correo).
+- `POST /api/login/`: acepta `email` (o `username` por compatibilidad) y `password`, devuelve token y rol.
 - `GET /api/productos/por-codigo/<codigo>/`: busca `productos.codigo_barra` en el dump SQL original.
 - `GET/POST /api/admin/usuarios/`: listar/crear usuarios con rol (`administrador`, `gerente`, `deposito`, `cajero`).
 - `GET/POST /api/admin/sucursales/`: listar/crear datos de comercio/sucursal.
@@ -25,7 +26,8 @@ Desde la pantalla de ventas, el botón **Cargar por código de barras** abre `Ba
 
 ## Endpoints Android (Retrofit)
 
-- `POST /api/login/` recibe `username` y `password`, devuelve token DRF y rol.
+- `POST /api/register/` recibe `email` y `password` y crea el usuario (sin campo `username`).
+- `POST /api/login/` recibe `email` (o `username`) y `password`, devuelve token DRF y rol.
 - `GET /api/productos/` lista los productos activos del SQL importado; admite `?search=`.
 - `GET /api/productos/por-codigo/<codigo>/` busca por código de barras.
 - `POST /api/productos/`, `PATCH /api/productos/<id>/`, `DELETE /api/productos/<id>/` administran productos con token y permisos.
