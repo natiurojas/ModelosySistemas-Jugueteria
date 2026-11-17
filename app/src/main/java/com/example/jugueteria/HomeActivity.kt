@@ -383,18 +383,10 @@ class HomeActivity : AppCompatActivity() {
 
     private fun loadProductsCount() {
 
-        backend.getProducts { products, error ->
-
-            if (error != null) {
-
-                txtProducts.text =
-                    "0"
-
-                return@getProducts
-            }
+        backend.getProductsCount { total, error ->
 
             txtProducts.text =
-                products.size.toString()
+                if (error == null) total.toString() else "0"
         }
     }
 

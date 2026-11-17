@@ -2,10 +2,16 @@ package com.example.jugueteria
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Button
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +37,17 @@ class ProductsActivity : AppCompatActivity() {
 
     private lateinit var btnAdd: ImageButton
     private lateinit var btnNewProduct: Button
+    private lateinit var txtProductsPage: TextView
+    private lateinit var btnLoadMoreProducts: Button
+
+    // Listado por páginas: en memoria queda como máximo lo que se fue mostrando.
+    private val loadedProducts = mutableListOf<Product>()
+    private lateinit var productAdapter: ProductAdapter
+    private var currentSearch = ""
+    private var totalProducts = 0
+    private var productRequestId = 0
+    private val searchHandler = Handler(Looper.getMainLooper())
+    private var searchRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -95,6 +112,8 @@ class ProductsActivity : AppCompatActivity() {
         btnAdd =
             findViewById(R.id.btnAdd)
         btnNewProduct = findViewById(R.id.btnNewProduct)
+        txtProductsPage = findViewById(R.id.txtProductsPage)
+        btnLoadMoreProducts = findViewById(R.id.btnLoadMoreProducts)
 
         // =================================
         // RECYCLER
@@ -102,6 +121,24 @@ class ProductsActivity : AppCompatActivity() {
 
         recyclerProducts.layoutManager =
             LinearLayoutManager(this)
+        setupProductAdapter()
+
+        btnLoadMoreProducts.setOnClickListener {
+            cargarProductos(reset = false)
+        }
+
+        findViewById<EditText>(R.id.edtSearch).addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchRunnable?.let { searchHandler.removeCallbacks(it) }
+                val query = s?.toString().orEmpty()
+                searchRunnable = Runnable {
+                    currentSearch = query
+                    cargarProductos(reset = true)
+                }.also { searchHandler.postDelayed(it, 300L) }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
 
         // =================================
         // NAVEGACIÓN
@@ -109,11 +146,8 @@ class ProductsActivity : AppCompatActivity() {
 
         setupNavigation()
 
-        // =================================
-        // CARGAR PRODUCTOS
-        // =================================
-
-        cargarProductos()
+        // La carga inicial la hace onResume (que se ejecuta justo después de onCreate)
+        // para no pedir dos veces la misma página al abrir la pantalla.
 
         btnNewProduct.setOnClickListener {
 
@@ -226,9 +260,28 @@ class ProductsActivity : AppCompatActivity() {
     // CARGAR PRODUCTOS
     // =====================================
 
-    private fun cargarProductos() {
+    private fun setupProductAdapter() {
+        productAdapter = ProductAdapter(
+            products = loadedProducts,
+            onView = { /* Acá después podemos abrir ProductDetailActivity */ },
+            onEdit = { product ->
+                val intent = Intent(this, AddEditProductActivity::class.java)
+                intent.putExtra("PRODUCT_ID", product.id)
+                startActivity(intent)
+            },
+            onDelete = { product -> eliminarProducto(product) }
+        )
+        recyclerProducts.adapter = productAdapter
+    }
 
-        backend.getProducts { products, error ->
+    private fun cargarProductos(reset: Boolean = true) {
+
+        val requestId = ++productRequestId
+        val offset = if (reset) 0 else loadedProducts.size
+
+        backend.getProductsPage(currentSearch, offset) { products, total, error ->
+
+            if (requestId != productRequestId) return@getProductsPage
 
             if (error != null) {
 
@@ -238,57 +291,21 @@ class ProductsActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
 
-                return@getProducts
+                return@getProductsPage
             }
 
-            val adapter =
-                ProductAdapter(
-
-                    products = products,
-
-                    // =========================
-                    // VER
-                    // =========================
-
-                    onView = { product ->
-
-                        // Acá después podemos abrir
-                        // ProductDetailActivity
-                    },
-
-                    // =========================
-                    // EDITAR
-                    // =========================
-
-                    onEdit = { product ->
-
-                        val intent =
-                            Intent(
-                                this,
-                                AddEditProductActivity::class.java
-                            )
-
-                        intent.putExtra(
-                            "PRODUCT_ID",
-                            product.id
-                        )
-
-                        startActivity(intent)
-                    },
-
-                    // =========================
-                    // ELIMINAR
-                    // =========================
-
-                    onDelete = { product ->
-
-                        eliminarProducto(product)
-                    }
-                )
-
-            recyclerProducts.adapter =
-                adapter
+            if (reset) loadedProducts.clear()
+            loadedProducts.addAll(products)
+            totalProducts = total
+            productAdapter.notifyDataSetChanged()
+            updatePaginationBar()
         }
+    }
+
+    private fun updatePaginationBar() {
+        txtProductsPage.text = "Mostrando ${loadedProducts.size} de $totalProducts"
+        btnLoadMoreProducts.visibility =
+            if (loadedProducts.size < totalProducts) View.VISIBLE else View.GONE
     }
 
     // =====================================
@@ -311,7 +328,7 @@ class ProductsActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                cargarProductos()
+                cargarProductos(reset = true)
 
             } else {
 

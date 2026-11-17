@@ -159,8 +159,8 @@ func set_base_url(url: String) -> void:
 # PRODUCTOS
 # -----------------------------------------------------------------------------
 
-func get_productos(search: String = "") -> Dictionary:
-	var query := {}
+func get_productos(search: String = "", limit: int = 50, offset: int = 0) -> Dictionary:
+	var query := {"limit": limit, "offset": offset}
 	if not search.strip_edges().is_empty():
 		query["search"] = search.strip_edges()
 	return await get_endpoint("/api/productos/", query)

@@ -482,6 +482,41 @@
             <!-- PAGINACIÓN                         -->
             <!-- ================================= -->
 
+            <LinearLayout
+                android:id="@+id/paginationBar"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="25dp"
+                android:layout_marginEnd="25dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/bottomNavigation">
+
+                <TextView
+                    android:id="@+id/txtProductsPage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Productos: 0"
+                    android:textColor="#7A8699"
+                    android:textSize="12sp" />
+
+                <Button
+                    android:id="@+id/btnLoadMoreProducts"
+                    android:layout_width="wrap_content"
+                    android:layout_height="32dp"
+                    android:minWidth="0dp"
+                    android:paddingStart="10dp"
+                    android:paddingEnd="10dp"
+                    android:text="Cargar más"
+                    android:textAllCaps="false"
+                    android:textSize="12sp"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.cardview.widget.CardView>

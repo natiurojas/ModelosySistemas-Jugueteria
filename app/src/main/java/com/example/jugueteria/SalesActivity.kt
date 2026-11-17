@@ -2,6 +2,8 @@ package com.example.jugueteria
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Button
 import android.widget.EditText
 import android.text.Editable
@@ -28,6 +30,11 @@ class SalesActivity : AppCompatActivity() {
     private var availableProducts: List<Product> = emptyList()
 
     private lateinit var backend: DjangoRepository
+
+    // Búsqueda en el servidor con debounce: nunca se filtran miles de productos en la UI.
+    private val searchHandler = Handler(Looper.getMainLooper())
+    private var searchRunnable: Runnable? = null
+    private var productRequestId = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -92,7 +99,21 @@ class SalesActivity : AppCompatActivity() {
         // CARGAR PRODUCTOS DESDE DJANGO
         // =================================
 
-        cargarProductos()
+        recyclerProducts.adapter = SaleProductAdapter(availableProducts) { product -> addProduct(product) }
+
+        findViewById<EditText>(R.id.edtSearchProduct).addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchRunnable?.let { searchHandler.removeCallbacks(it) }
+                val query = s?.toString().orEmpty()
+                searchRunnable = Runnable { cargarProductos(query) }.also {
+                    searchHandler.postDelayed(it, 300L)
+                }
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
+        cargarProductos("")
 
         // =================================
         // ADAPTER DETALLE
@@ -139,9 +160,14 @@ class SalesActivity : AppCompatActivity() {
     // CARGAR PRODUCTOS
     // =====================================
 
-    private fun cargarProductos() {
+    private fun cargarProductos(query: String = "") {
 
-        backend.getProducts { products, error ->
+        val requestId = ++productRequestId
+
+        backend.searchProducts(query) { products, error ->
+
+            // Descarta respuestas de búsquedas anteriores.
+            if (requestId != productRequestId) return@searchProducts
 
             if (error != null) {
 
@@ -151,16 +177,11 @@ class SalesActivity : AppCompatActivity() {
                     Toast.LENGTH_SHORT
                 ).show()
 
-                return@getProducts
+                return@searchProducts
             }
 
             availableProducts = products
-            showFilteredProducts("")
-            findViewById<EditText>(R.id.edtSearchProduct).addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { showFilteredProducts(s?.toString().orEmpty()) }
-                override fun afterTextChanged(s: Editable?) {}
-            })
+            showProducts()
         }
     }
 
@@ -178,13 +199,9 @@ class SalesActivity : AppCompatActivity() {
         }
     }
 
-    private fun showFilteredProducts(query: String) {
-        val filtered = availableProducts.filter { product ->
-            product.name.contains(query, ignoreCase = true) ||
-                product.description.contains(query, ignoreCase = true) ||
-                product.id.contains(query, ignoreCase = true)
-        }
-        recyclerProducts.adapter = SaleProductAdapter(filtered) { product -> addProduct(product) }
+    private fun showProducts() {
+        // El filtro ya se hizo en el backend; acá solo se muestra la página recibida.
+        recyclerProducts.adapter = SaleProductAdapter(availableProducts) { product -> addProduct(product) }
     }
 
     // =====================================

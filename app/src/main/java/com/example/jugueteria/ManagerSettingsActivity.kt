@@ -79,10 +79,11 @@ class ManagerStockActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.txtManagerSummary).text = "Consultando productos..."
         val recycler = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.recyclerManagerRecords)
         recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
-        ApiClient.api.products().enqueue(object : retrofit2.Callback<List<ApiProduct>> {
+        ApiClient.api.products(limit = 100).enqueue(object : retrofit2.Callback<List<ApiProduct>> {
             override fun onResponse(call: retrofit2.Call<List<ApiProduct>>, response: retrofit2.Response<List<ApiProduct>>) {
                 val products = response.body().orEmpty()
-                findViewById<TextView>(R.id.txtManagerSummary).text = if (response.isSuccessful) "Productos registrados: ${products.size}" else "No se pudo consultar el stock (${response.code()})"
+                val total = response.headers()["X-Total-Count"]?.toIntOrNull() ?: products.size
+                findViewById<TextView>(R.id.txtManagerSummary).text = if (response.isSuccessful) "Productos registrados: $total (mostrando ${products.size})" else "No se pudo consultar el stock (${response.code()})"
                 recycler.adapter = ManagerRecordAdapter(products.map { ManagerRecord(it.nombre, "Stock: ${it.stock} unidades", java.text.NumberFormat.getCurrencyInstance(java.util.Locale("es","AR")).format(it.precio)) })
             }
             override fun onFailure(call: retrofit2.Call<List<ApiProduct>>, t: Throwable) {

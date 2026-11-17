@@ -50,7 +50,12 @@ data class ManagerReport(val tipo: String? = null, val fecha: String? = null, va
 interface JugueteriaApi {
     @POST("api/register/") fun register(@Body body: Map<String, @JvmSuppressWildcards String>): Call<Map<String, Any>>
     @POST("api/login/") fun login(@Body body: ApiLoginRequest): Call<ApiLoginResponse>
-    @GET("api/productos/") fun products(@Query("search") search: String? = null): Call<List<ApiProduct>>
+    @GET("api/productos/") fun products(
+        @Query("search") search: String? = null,
+        @Query("limit") limit: Int? = null,
+        @Query("offset") offset: Int? = null
+    ): Call<List<ApiProduct>>
+    @GET("api/productos/{id}/") fun product(@Header("Authorization") token: String, @Path("id") id: String): Call<ApiProduct>
     @GET("api/productos/por-codigo/{codigo}/") fun productByBarcode(@Path("codigo") barcode: String): Call<ApiProduct>
     @POST("api/ventas/") fun createSale(@Header("Authorization") token: String, @Body body: ApiSaleRequest): Call<ApiSaleResponse>
     @GET("api/ventas/") fun sales(@Header("Authorization") token: String): Call<List<ApiSaleResponse>>

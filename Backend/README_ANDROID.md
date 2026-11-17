@@ -28,7 +28,12 @@ Desde la pantalla de ventas, el botón **Cargar por código de barras** abre `Ba
 
 - `POST /api/login/` recibe `email` y `password`, devuelve token DRF y rol.
 - `POST /api/admin/usuarios/` (con token de administrador) recibe `username`, `email`, `password` y `role` para dar de alta usuarios.
-- `GET /api/productos/` lista los productos activos del SQL importado; admite `?search=`.
+- `GET /api/productos/` lista los productos activos **por páginas**. Parámetros opcionales:
+  - `search`: filtra en el servidor por descripción, código, código de barras o id.
+  - `limit`: cantidad máxima (por defecto `50`, tope `200`).
+  - `offset`: desplazamiento (por defecto `0`).
+  - La respuesta sigue siendo un array de productos e incluye los headers `X-Total-Count`, `X-Limit` y `X-Offset` para paginar sin descargar todo el catálogo.
+- `GET /api/productos/<id>/` devuelve un solo producto (requiere token). Evita pedir el listado completo para editar.
 - `GET /api/productos/por-codigo/<codigo>/` busca por código de barras.
 - `POST /api/productos/`, `PATCH /api/productos/<id>/`, `DELETE /api/productos/<id>/` administran productos con token y permisos.
 - `POST /api/ventas/` registra factura y detalle en `facturas` y `factura_detalle`, descuenta stock en una transacción.

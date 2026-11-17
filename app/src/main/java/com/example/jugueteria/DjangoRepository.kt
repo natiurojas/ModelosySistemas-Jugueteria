@@ -37,16 +37,64 @@ class DjangoRepository(private val activity: ComponentActivity) {
     fun createUserDocument(onFinish: (Boolean, Exception?) -> Unit) = onFinish(true, null)
 
     private fun mapProduct(p: ApiProduct) = Product(p.id.toString(), "", p.nombre, p.descripcion, p.categoria ?: "", p.precio, p.stock)
-    fun getProducts(onFinish: (List<Product>, Exception?) -> Unit) {
-        ApiClient.api.products().enqueue(object : Callback<List<ApiProduct>> {
-            override fun onResponse(call: Call<List<ApiProduct>>, response: Response<List<ApiProduct>>) { if (response.isSuccessful) onFinish(response.body().orEmpty().map(::mapProduct), null) else onFinish(emptyList(), Exception("Error consultando productos (${response.code()})")) }
-            override fun onFailure(call: Call<List<ApiProduct>>, t: Throwable) = onFinish(emptyList(), Exception(t.message ?: "Error de conexión"))
+
+    companion object {
+        /** Las pantallas piden páginas chicas en vez de todo el catálogo. */
+        const val PRODUCT_PAGE_SIZE = 50
+    }
+
+    /** Devuelve una página y el total real (viene en el header X-Total-Count). */
+    fun getProductsPage(search: String, offset: Int, onFinish: (List<Product>, Int, Exception?) -> Unit) {
+        val query = if (search.isBlank()) null else search.trim()
+        ApiClient.api.products(query, PRODUCT_PAGE_SIZE, offset).enqueue(object : Callback<List<ApiProduct>> {
+            override fun onResponse(call: Call<List<ApiProduct>>, response: Response<List<ApiProduct>>) {
+                if (!response.isSuccessful) {
+                    onFinish(emptyList(), 0, Exception("Error consultando productos (${response.code()})"))
+                    return
+                }
+                val items = response.body().orEmpty().map(::mapProduct)
+                val total = response.headers()["X-Total-Count"]?.toIntOrNull() ?: items.size
+                onFinish(items, total, null)
+            }
+            override fun onFailure(call: Call<List<ApiProduct>>, t: Throwable) =
+                onFinish(emptyList(), 0, Exception(t.message ?: "Error de conexión"))
         })
     }
+
+    fun searchProducts(query: String, onFinish: (List<Product>, Exception?) -> Unit) {
+        getProductsPage(query, 0) { products, _, error -> onFinish(products, error) }
+    }
+
+    fun getProducts(onFinish: (List<Product>, Exception?) -> Unit) {
+        getProductsPage("", 0) { products, _, error -> onFinish(products, error) }
+    }
+
+    /** Para el contador del inicio: 1 solo producto y el total del header. */
+    fun getProductsCount(onFinish: (Int, Exception?) -> Unit) {
+        ApiClient.api.products(limit = 1, offset = 0).enqueue(object : Callback<List<ApiProduct>> {
+            override fun onResponse(call: Call<List<ApiProduct>>, response: Response<List<ApiProduct>>) {
+                if (!response.isSuccessful) {
+                    onFinish(0, Exception("Error consultando productos (${response.code()})"))
+                    return
+                }
+                val total = response.headers()["X-Total-Count"]?.toIntOrNull() ?: response.body().orEmpty().size
+                onFinish(total, null)
+            }
+            override fun onFailure(call: Call<List<ApiProduct>>, t: Throwable) =
+                onFinish(0, Exception(t.message ?: "Error de conexión"))
+        })
+    }
+
+    /** Consulta puntual por id: antes descargaba todo el listado y buscaba adentro. */
     fun getProductById(id: String, onFinish: (Product?, Exception?) -> Unit) {
-        ApiClient.api.products().enqueue(object : Callback<List<ApiProduct>> {
-            override fun onResponse(call: Call<List<ApiProduct>>, response: Response<List<ApiProduct>>) { val p = response.body().orEmpty().firstOrNull { it.id.toString() == id }; onFinish(p?.let(::mapProduct), if (response.isSuccessful) null else Exception("Error consultando producto")) }
-            override fun onFailure(call: Call<List<ApiProduct>>, t: Throwable) = onFinish(null, Exception(t.message ?: "Error de conexión"))
+        ApiClient.api.product(authHeader(), id).enqueue(object : Callback<ApiProduct> {
+            override fun onResponse(call: Call<ApiProduct>, response: Response<ApiProduct>) {
+                onFinish(
+                    response.body()?.let(::mapProduct),
+                    if (response.isSuccessful) null else Exception("Error consultando producto (${response.code()})")
+                )
+            }
+            override fun onFailure(call: Call<ApiProduct>, t: Throwable) = onFinish(null, Exception(t.message ?: "Error de conexión"))
         })
     }
     fun addProduct(product: Product, onFinish: (Boolean, Exception?) -> Unit) {

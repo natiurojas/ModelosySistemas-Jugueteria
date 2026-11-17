@@ -206,17 +206,54 @@ def _product_dict(row):
             "precio": float(row[2] or 0), "stock": int(row[3] or 0), "codigo_barras": row[4],
             "categoria": row[5] or ""}
 
+
+PRODUCTOS_POR_PAGINA = 50
+PRODUCTOS_POR_PAGINA_MAX = 200
+
+
+def _int_param(value, default, minimum, maximum=None):
+    """Convierte un query param a entero acotado, con valor por defecto seguro."""
+    try:
+        number = int(value)
+    except (TypeError, ValueError):
+        return default
+    number = max(minimum, number)
+    if maximum is not None:
+        number = min(number, maximum)
+    return number
+
+
 @api_view(["GET", "POST"])
 def AndroidProductos(request):
     if request.method == "GET":
         q = (request.query_params.get("search") or "").strip()
+        limit = _int_param(request.query_params.get("limit"), PRODUCTOS_POR_PAGINA, 1, PRODUCTOS_POR_PAGINA_MAX)
+        offset = _int_param(request.query_params.get("offset"), 0, 0)
+
+        where = "activo=1"
+        params = []
+        if q:
+            like = f"%{q}%"
+            where += " AND (descripcion LIKE %s OR codigo LIKE %s OR codigo_barra LIKE %s OR CAST(id AS CHAR) LIKE %s)"
+            params = [like, like, like, like]
+
         with connection.cursor() as cursor:
-            if q:
-                like = f"%{q}%"
-                cursor.execute("SELECT id, descripcion, precio_final, stock, codigo_barra, familia FROM productos WHERE activo=1 AND (descripcion LIKE %s OR codigo LIKE %s OR codigo_barra LIKE %s OR CAST(id AS CHAR) LIKE %s) ORDER BY descripcion LIMIT 1000", [like, like, like, like])
-            else:
-                cursor.execute("SELECT id, descripcion, precio_final, stock, codigo_barra, familia FROM productos WHERE activo=1 ORDER BY descripcion LIMIT 2000")
-            return Response([_product_dict(r) for r in cursor.fetchall()])
+            cursor.execute(f"SELECT COUNT(*) FROM productos WHERE {where}", params)
+            total = int(cursor.fetchone()[0] or 0)
+            cursor.execute(
+                f"SELECT id, descripcion, precio_final, stock, codigo_barra, familia "
+                f"FROM productos WHERE {where} ORDER BY descripcion, id LIMIT %s OFFSET %s",
+                params + [limit, offset],
+            )
+            rows = cursor.fetchall()
+
+        # Se mantiene el formato List<ApiProduct>; el total viaja en un header
+        # para que los clientes puedan paginar sin descargar todo el catálogo.
+        response = Response([_product_dict(r) for r in rows])
+        response["X-Total-Count"] = str(total)
+        response["X-Limit"] = str(limit)
+        response["X-Offset"] = str(offset)
+        return response
     if not request.user.is_authenticated:
         return Response({"detail":"Autenticación requerida"}, status=401)
     if not (request.user.is_staff or request.user.is_superuser or getattr(getattr(request.user, "perfil_sistema", None), "rol", "") in ["administrador", "gerente", "deposito"]):
@@ -234,9 +271,17 @@ def AndroidProductos(request):
         cursor.execute("SELECT id, descripcion, precio_final, stock, codigo_barra, familia FROM productos WHERE id=%s", [pid])
         return Response(_product_dict(cursor.fetchone()), status=201)
 
-@api_view(["PATCH", "PUT", "DELETE"])
+@api_view(["GET", "PATCH", "PUT", "DELETE"])
 @permission_classes([IsAuthenticated])
 def AndroidProductoDetalle(request, pk):
+    if request.method == "GET":
+        # Consulta puntual: evita tener que pedir/buscar en todo el listado.
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT id, descripcion, precio_final, stock, codigo_barra, familia FROM productos WHERE id=%s AND activo=1", [pk])
+            row = cursor.fetchone()
+        if not row:
+            return Response({"detail": "Producto no encontrado"}, status=404)
+        return Response(_product_dict(row))
     if not (request.user.is_staff or request.user.is_superuser or getattr(getattr(request.user, "perfil_sistema", None), "rol", "") in ["administrador", "gerente", "deposito"]):
         return Response({"detail":"No tenés permisos para administrar productos"}, status=403)
     with connection.cursor() as cursor:
