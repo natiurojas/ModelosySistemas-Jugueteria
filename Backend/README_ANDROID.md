@@ -19,6 +19,10 @@ En Android, colocar la IP LAN de la PC que ejecuta Django y el puerto `8000` en 
 
 Los endpoints administrativos requieren `Authorization: Token <token>` y un usuario `is_staff`. El panel Android reutiliza automáticamente el token de la sesión iniciada.
 
+## Lector de código de barras
+
+Desde la pantalla de ventas, el botón **Cargar por código de barras** abre `BarcodeProductActivity`. El botón **Activar cámara** solicita el permiso `android.permission.CAMERA`, muestra la vista previa con CameraX y detecta el código con ML Kit (EAN-13, UPC, Code 39, QR, etc.). Al detectar un valor se consulta `GET /api/productos/por-codigo/<codigo>/` y, si existe, el producto se agrega automáticamente a la venta. Si no hay cámara, el permiso es denegado o la lectura falla, se puede escribir el código manualmente en el mismo formulario.
+
 ## Endpoints Android (Retrofit)
 
 - `POST /api/login/` recibe `username` y `password`, devuelve token DRF y rol.
