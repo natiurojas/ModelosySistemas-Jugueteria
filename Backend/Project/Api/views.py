@@ -349,15 +349,26 @@ def AndroidVentas(request):
                     cursor.execute("INSERT INTO factura_detalle (factura_id, producto_id, cantidad, precio_unitario, subtotal) VALUES (%s,%s,%s,%s,%s)", [invoice_id,p[0],qty,unit,subtotal])
                     cursor.execute("UPDATE productos SET stock=stock-%s WHERE id=%s", [qty,p[0]])
                 return Response({"id":invoice_id,"date":timezone.now().isoformat(),"total":total,"userId":username,"clientName":"","items":[{"producto_id":p[0],"nombre":p[1],"cantidad":qty,"precio_unitario":unit,"subtotal":subtotal} for p,qty,unit,subtotal in normalized]}, status=201)
+    try:
+        extra_where, date_params = _sales_period_bounds(request.query_params)
+    except ValueError as exc:
+        return Response({"detail": str(exc)}, status=status.HTTP_400_BAD_REQUEST)
+
     with connection.cursor() as cursor:
-        cursor.execute("SELECT id, fecha, total, usuario_id FROM facturas ORDER BY fecha DESC, id DESC LIMIT 500")
+        cursor.execute(f"SELECT COUNT(*) FROM facturas WHERE 1=1{extra_where}", date_params)
+        total_count = int(cursor.fetchone()[0] or 0)
+        cursor.execute(f"SELECT id, fecha, total, usuario_id FROM facturas WHERE 1=1{extra_where} ORDER BY fecha DESC, id DESC LIMIT 500", date_params)
         rows=cursor.fetchall()
         result=[]
         for row in rows:
             cursor.execute("SELECT d.producto_id, COALESCE(p.descripcion,'Producto'), d.cantidad, d.precio_unitario, d.subtotal FROM factura_detalle d LEFT JOIN productos p ON p.id=d.producto_id WHERE d.factura_id=%s", [row[0]])
             items=[{"producto_id":int(i[0]),"nombre":i[1],"cantidad":int(i[2]),"precio_unitario":float(i[3]),"subtotal":float(i[4])} for i in cursor.fetchall()]
-            result.append({"id":int(row[0]),"date":row[1].isoformat() if row[1] else None,"total":float(row[2]),"userId":str(row[3]),"clientName":"","items":items})
-        return Response(result)
+            fecha = row[1]
+            fecha_str = fecha.isoformat() if hasattr(fecha, "isoformat") else (str(fecha) if fecha else None)
+            result.append({"id":int(row[0]),"date":fecha_str,"total":float(row[2]),"userId":str(row[3]),"clientName":"","items":items})
+        response = Response(result)
+        response["X-Total-Count"] = str(total_count)
+        return response
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
@@ -512,7 +523,7 @@ class AdminCajaDetalleView(APIView):
         return Response(status=204)
 
 # ========================= MODULO GERENTE =========================
-from datetime import datetime, time as datetime_time, timedelta
+from datetime import datetime, date as datetime_date, time as datetime_time, timedelta
 from zoneinfo import ZoneInfo
 
 ARGENTINA_TZ = ZoneInfo("America/Argentina/Buenos_Aires")
@@ -523,6 +534,52 @@ def _argentina_day_bounds(day):
     end = start + timedelta(days=1)
     return (start.astimezone(UTC_TZ).replace(tzinfo=None), end.astimezone(UTC_TZ).replace(tzinfo=None))
 from django.utils.dateparse import parse_date
+
+
+def _sales_period_bounds(query_params):
+    """Devuelve un WHERE y sus parámetros para filtrar ventas por día/mes/año.
+
+    Las fechas se interpretan en hora Argentina y se convierten al UTC naive
+    en el que se guardan las facturas.
+    """
+    periodo = (query_params.get("periodo") or query_params.get("period") or "").strip().lower()
+    if not periodo:
+        return "", []
+
+    def to_stored(start, end):
+        return (start.astimezone(UTC_TZ).replace(tzinfo=None),
+                end.astimezone(UTC_TZ).replace(tzinfo=None))
+
+    if periodo == "dia":
+        raw = query_params.get("fecha") or query_params.get("date") or ""
+        day = parse_date(raw)
+        if not day:
+            raise ValueError("La fecha debe tener formato YYYY-MM-DD")
+        start, end = _argentina_day_bounds(day)
+    elif periodo == "mes":
+        raw = query_params.get("mes") or query_params.get("month") or ""
+        day = parse_date(f"{raw}-01")
+        if not day:
+            raise ValueError("El mes debe tener formato YYYY-MM")
+        next_month = datetime_date(day.year + (day.month == 12), (day.month % 12) + 1, 1)
+        start, end = to_stored(
+            datetime.combine(day, datetime_time.min, tzinfo=ARGENTINA_TZ),
+            datetime.combine(next_month, datetime_time.min, tzinfo=ARGENTINA_TZ),
+        )
+    elif periodo in ("anio", "ano", "año"):
+        raw = query_params.get("anio") or query_params.get("year") or ""
+        day = parse_date(f"{raw}-01-01")
+        if not day:
+            raise ValueError("El año debe tener formato YYYY")
+        next_year = datetime_date(day.year + 1, 1, 1)
+        start, end = to_stored(
+            datetime.combine(day, datetime_time.min, tzinfo=ARGENTINA_TZ),
+            datetime.combine(next_year, datetime_time.min, tzinfo=ARGENTINA_TZ),
+        )
+    else:
+        raise ValueError("Período inválido. Use dia, mes o anio")
+
+    return " AND fecha >= %s AND fecha < %s", [start, end]
 
 
 def _is_manager(user):

@@ -58,7 +58,13 @@ interface JugueteriaApi {
     @GET("api/productos/{id}/") fun product(@Header("Authorization") token: String, @Path("id") id: String): Call<ApiProduct>
     @GET("api/productos/por-codigo/{codigo}/") fun productByBarcode(@Path("codigo") barcode: String): Call<ApiProduct>
     @POST("api/ventas/") fun createSale(@Header("Authorization") token: String, @Body body: ApiSaleRequest): Call<ApiSaleResponse>
-    @GET("api/ventas/") fun sales(@Header("Authorization") token: String): Call<List<ApiSaleResponse>>
+    @GET("api/ventas/") fun sales(
+        @Header("Authorization") token: String,
+        @Query("periodo") period: String? = null,
+        @Query("fecha") date: String? = null,
+        @Query("mes") month: String? = null,
+        @Query("anio") year: String? = null
+    ): Call<List<ApiSaleResponse>>
     @GET("api/ventas/{id}/") fun sale(@Header("Authorization") token: String, @Path("id") id: String): Call<ApiSaleResponse>
     @POST("api/productos/") fun createProduct(@Header("Authorization") token: String, @Body body: Map<String, @JvmSuppressWildcards Any>): Call<ApiProduct>
     @PATCH("api/productos/{id}/") fun updateProduct(@Header("Authorization") token: String, @Path("id") id: String, @Body body: Map<String, @JvmSuppressWildcards Any>): Call<ApiProduct>

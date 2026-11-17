@@ -1,7 +1,8 @@
 package com.example.jugueteria
 
 import androidx.activity.ComponentActivity
-import java.time.OffsetDateTime
+import java.time.LocalDateTime
+import java.time.ZoneOffset
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -124,15 +125,43 @@ class DjangoRepository(private val activity: ComponentActivity) {
             override fun onFailure(call: Call<ApiSaleResponse>, t: Throwable) = onFinish(false, null, Exception(t.message ?: "Error de conexión"))
         })
     }
+    private fun parseSaleDate(raw: String?): Long {
+        if (raw.isNullOrBlank()) return 0L
+        return try {
+            val normalized = raw.replace(' ', 'T').substringBefore('+').substringBefore('Z').substringBefore('.')
+            LocalDateTime.parse(normalized).toInstant(ZoneOffset.UTC).toEpochMilli()
+        } catch (_: Exception) {
+            raw.toLongOrNull() ?: 0L
+        }
+    }
+
     private fun mapSale(s: ApiSaleResponse): Sale {
         val items = s.items.map { i -> SaleItem(Product(i.producto_id.toString(), "", i.nombre, "", "", i.precio_unitario, 0), i.cantidad) }
-        val timestamp = try { s.date?.let { OffsetDateTime.parse(it).toInstant().toEpochMilli() } ?: 0L } catch (_: Exception) { 0L }
-        return Sale(s.id.toString(), s.userId ?: "", "", s.clientName ?: "", timestamp, items, s.total)
+        return Sale(s.id.toString(), s.userId ?: "", "", s.clientName ?: "", parseSaleDate(s.date), items, s.total)
     }
+
     fun getSales(onFinish: (List<Sale>, Exception?) -> Unit) {
         ApiClient.api.sales(authHeader()).enqueue(object : Callback<List<ApiSaleResponse>> {
             override fun onResponse(call: Call<List<ApiSaleResponse>>, response: Response<List<ApiSaleResponse>>) { onFinish(if(response.isSuccessful) response.body().orEmpty().map(::mapSale) else emptyList(), if(response.isSuccessful) null else Exception("Error consultando facturas (${response.code()})")) }
             override fun onFailure(call: Call<List<ApiSaleResponse>>, t: Throwable) = onFinish(emptyList(), Exception(t.message ?: "Error de conexión"))
+        })
+    }
+
+    /** filtra en el backend: periodo = dia|mes|anio, value = YYYY-MM-DD | YYYY-MM | YYYY. */
+    fun getSalesFiltered(period: String?, value: String?, onFinish: (List<Sale>, Exception?) -> Unit) {
+        ApiClient.api.sales(
+            token = authHeader(),
+            period = period,
+            date = if (period == "dia") value else null,
+            month = if (period == "mes") value else null,
+            year = if (period == "anio") value else null
+        ).enqueue(object : Callback<List<ApiSaleResponse>> {
+            override fun onResponse(call: Call<List<ApiSaleResponse>>, response: Response<List<ApiSaleResponse>>) {
+                if (response.isSuccessful) onFinish(response.body().orEmpty().map(::mapSale), null)
+                else onFinish(emptyList(), Exception("Error consultando facturas (${response.code()})"))
+            }
+            override fun onFailure(call: Call<List<ApiSaleResponse>>, t: Throwable) =
+                onFinish(emptyList(), Exception(t.message ?: "Error de conexión"))
         })
     }
     fun getSale(saleId: String, onFinish: (Sale?, Exception?) -> Unit) {
