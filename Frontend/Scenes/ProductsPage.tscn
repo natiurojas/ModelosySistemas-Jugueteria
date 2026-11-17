@@ -1,0 +1,117 @@
+[gd_scene format=3 uid="uid://duplcqptn2or6"]
+
+[ext_resource type="Script" uid="uid://dtowbocmj476p" path="res://CSS/ControlCSS.gd" id="1_mm8dk"]
+[ext_resource type="Script" uid="uid://cq71cporo46lc" path="res://CSS/PanelCSS.gd" id="2_apm07"]
+[ext_resource type="Script" uid="uid://j0wxshqcovmo" path="res://CSS/LabelCSS.gd" id="3_on662"]
+[ext_resource type="Script" uid="uid://e0687jlh8o6u" path="res://CSS/TextureRectCSS.gd" id="5_xthk4"]
+[ext_resource type="Texture2D" uid="uid://cvd6cimbhhtu8" path="res://Assets/loading_circle.png" id="9_ah4y2"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vasrq"]
+bg_color = Color(1, 0.99215686, 0.972549, 1)
+
+[sub_resource type="Animation" id="Animation_5vvyt"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_c6i3y"]
+resource_name = "rotate"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.2831855]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_36nn4"]
+_data = {
+&"RESET": SubResource("Animation_5vvyt"),
+&"rotate": SubResource("Animation_c6i3y")
+}
+
+[sub_resource type="SystemFont" id="SystemFont_257lx"]
+font_names = PackedStringArray("Sans-Serif")
+
+[node name="HomePage" type="Control" unique_id=1110389247]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+metadata/_custom_type_script = "uid://dtowbocmj476p"
+
+[node name="Bg" type="Panel" parent="." unique_id=1585303242]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_vasrq")
+script = ExtResource("2_apm07")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="Page" type="Control" parent="." unique_id=546132000]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+script = ExtResource("1_mm8dk")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://dtowbocmj476p"
+
+[node name="LoadingCircle" type="TextureRect" parent="." unique_id=263792108]
+unique_name_in_owner = true
+modulate = Color(0.47682333, 0.44514596, 0.3740858, 1)
+layout_mode = 0
+offset_left = 526.0
+offset_top = 274.0
+offset_right = 626.0
+offset_bottom = 374.0
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("9_ah4y2")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5_xthk4")
+screen_anchor = 4
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="LoadingCircleAnim" type="AnimationPlayer" parent="LoadingCircle" unique_id=877344191]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_36nn4")
+
+[node name="ErrorTxt" type="Label" parent="." unique_id=1129676877]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 306.5
+offset_right = 1152.0
+offset_bottom = 341.5
+theme_override_colors/font_color = Color(1, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_257lx")
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("3_on662")
+screen_anchor = 4
+position_unit = 1
+width_unit = 1
+font_size_css = 30
+text_align_css = 1
+metadata/_custom_type_script = "uid://j0wxshqcovmo"

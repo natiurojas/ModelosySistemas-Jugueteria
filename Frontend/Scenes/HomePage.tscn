@@ -1,0 +1,575 @@
+[gd_scene format=3 uid="uid://4xbnx03pu1ir"]
+
+[ext_resource type="Script" uid="uid://dtowbocmj476p" path="res://CSS/ControlCSS.gd" id="2_iwahq"]
+[ext_resource type="Script" uid="uid://cq71cporo46lc" path="res://CSS/PanelCSS.gd" id="3_h4cya"]
+[ext_resource type="Script" uid="uid://j0wxshqcovmo" path="res://CSS/LabelCSS.gd" id="4_vasrq"]
+[ext_resource type="Texture2D" uid="uid://iutl7o86uwpu" path="res://Assets/ic_calendar.png" id="5_257lx"]
+[ext_resource type="Script" uid="uid://e0687jlh8o6u" path="res://CSS/TextureRectCSS.gd" id="5_bk6ph"]
+[ext_resource type="Texture2D" uid="uid://d3w6bssyf2mvw" path="res://Assets/ic_cart.png" id="5_ysxey"]
+[ext_resource type="Texture2D" uid="uid://cij4hfcveivnu" path="res://Assets/ic_document.png" id="7_7pekp"]
+[ext_resource type="Texture2D" uid="uid://mpxmgdbst15j" path="res://Assets/ic_box.png" id="8_257lx"]
+[ext_resource type="Texture2D" uid="uid://cvd6cimbhhtu8" path="res://Assets/loading_circle.png" id="9_257lx"]
+
+[sub_resource type="GDScript" id="GDScript_257lx"]
+script/source = "@tool
+extends ScrollContainerCSS
+@onready var Page: ControlCSS = %Page
+@onready var WelcomeTxt: LabelCSS = %WelcomeTxt
+@onready var DateTxt: LabelCSS = %DateTxt
+@onready var SalesTxt: LabelCSS = %SalesTxt
+@onready var InvoicesTxt: LabelCSS = %InvoicesTxt
+@onready var ProductsTxt: LabelCSS = %ProductsTxt
+@onready var LoadingCircle: TextureRectCSS = %LoadingCircle
+@onready var LoadingCircleAnim: AnimationPlayer = %LoadingCircleAnim
+@onready var ErrorTxt: LabelCSS = %ErrorTxt
+
+# Called when the node enters the scene tree for the first time.
+func _ready() -> void:
+	super._ready()
+	Page.visible = false
+	LoadingCircle.visible = true
+	LoadingCircleAnim.play(\"rotate\")
+
+	# Cargamos las ventas
+	var response: Dictionary = await BackendClient.get_ventas()
+	if not response.ok:
+		_show_error(response)
+		return
+
+	var sales: Array = response.data
+	_load_sales_today(sales)
+
+	# Cargamos los productos
+	response = await BackendClient.get_productos()
+	if not response.ok:
+		_show_error(response)
+		return
+
+	var products: Array = response.data
+
+	WelcomeTxt.text = \"¡Bienvenido %s!\" % BackendClient.username
+	DateTxt.text = _get_formatted_date()
+	ProductsTxt.text = str(products.size())
+
+	LoadingCircle.visible = false
+	Page.visible = true
+
+func _show_error(response: Dictionary):
+	Page.visible = false
+	LoadingCircle.visible = false
+	ErrorTxt.visible = true
+	if response.status == 0:
+		ErrorTxt.text = \"%s: %d\" % [\"Sin respuesta\", 503]
+	else:
+		var error_message = response.data.get(\"error\", \"\")
+		if error_message == \"\":
+			error_message = response.data.get(\"detail\", \"\")
+		if error_message == \"\":
+			error_message = response.data.get(\"message\", \"\")
+		if error_message == \"\":
+			error_message = \"Error desconocido\"
+		ErrorTxt.text = \"%s: %d\" % [str(error_message), response.status]
+
+func _get_formatted_date() -> String:
+	var date := Time.get_date_dict_from_system()
+
+	var months := [
+		\"enero\",
+		\"febrero\",
+		\"marzo\",
+		\"abril\",
+		\"mayo\",
+		\"junio\",
+		\"julio\",
+		\"agosto\",
+		\"septiembre\",
+		\"octubre\",
+		\"noviembre\",
+		\"diciembre\"
+	]
+
+	return \"%02d de %s de %d\" % [
+		date.day,
+		months[date.month - 1],
+		date.year
+	]
+
+
+func _load_sales_today(sales: Array) -> void:
+	# =================================
+	# INICIO DEL DÍA
+	# =================================
+
+	var today := Time.get_date_dict_from_system()
+
+	var start_of_day := {
+		\"year\": today.year,
+		\"month\": today.month,
+		\"day\": today.day,
+		\"hour\": 0,
+		\"minute\": 0,
+		\"second\": 0
+	}
+
+	var start_timestamp := (
+		Time.get_unix_time_from_datetime_dict(
+			start_of_day
+		) * 1000
+	)
+
+	# =================================
+	# FIN DEL DÍA
+	# =================================
+
+	var end_of_day := start_of_day.duplicate()
+	end_of_day.hour = 23
+	end_of_day.minute = 59
+	end_of_day.second = 59
+
+	var end_timestamp := (
+		Time.get_unix_time_from_datetime_dict(
+			end_of_day
+		) * 1000 + 999
+	)
+
+	# =================================
+	# FILTRAR VENTAS DE HOY
+	# =================================
+
+	var today_sales: Array = sales.filter(
+		func(sale: Dictionary) -> bool:
+			var sale_date = sale.get(\"date\", 0)
+
+			return (
+				int(sale_date) >= start_timestamp
+				and int(sale_date) <= end_timestamp
+			)
+	)
+
+	# =================================
+	# TOTAL VENDIDO
+	# =================================
+
+	var total := 0.0
+
+	for sale in today_sales:
+		total += float(sale.get(\"total\", 0))
+
+	# =================================
+	# CANTIDAD DE FACTURAS
+	# =================================
+
+	var invoice_count := today_sales.size()
+
+	# =================================
+	# MOSTRAR
+	# =================================
+
+	SalesTxt.text = \"$ %.0f\" % total
+	InvoicesTxt.text = str(invoice_count)
+"
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vasrq"]
+bg_color = Color(1, 0.99215686, 0.972549, 1)
+
+[sub_resource type="SystemFont" id="SystemFont_0bcne"]
+font_names = PackedStringArray("Sans-Serif")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_h4cya"]
+bg_color = Color(0.9882353, 0.94509804, 0.98039216, 1)
+corner_radius_top_left = 13
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 13
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_36nn4"]
+bg_color = Color(0.9411765, 0.9647059, 0.98039216, 1)
+corner_radius_top_left = 13
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 13
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_vbw82"]
+bg_color = Color(1, 0.972549, 0.9098039, 1)
+corner_radius_top_left = 13
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 13
+
+[sub_resource type="Animation" id="Animation_5vvyt"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_c6i3y"]
+resource_name = "rotate"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.2831855]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_36nn4"]
+_data = {
+&"RESET": SubResource("Animation_5vvyt"),
+&"rotate": SubResource("Animation_c6i3y")
+}
+
+[sub_resource type="SystemFont" id="SystemFont_257lx"]
+font_names = PackedStringArray("Sans-Serif")
+
+[node name="HomePage" type="ScrollContainer" unique_id=2088393241]
+offset_right = 1152.0
+offset_bottom = 648.0
+script = SubResource("GDScript_257lx")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://oxlajmcpj6ga"
+
+[node name="ControlCSS" type="Control" parent="." unique_id=1140967798]
+custom_minimum_size = Vector2(1152, 900)
+layout_mode = 2
+script = ExtResource("2_iwahq")
+width_unit = 1
+height_unit = 1
+css_min_size = Vector2(100, 900)
+min_width_unit = 1
+metadata/_custom_type_script = "uid://dtowbocmj476p"
+
+[node name="Bg" type="Panel" parent="ControlCSS" unique_id=1143548757]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 900.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_vasrq")
+script = ExtResource("3_h4cya")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="Page" type="Control" parent="ControlCSS" unique_id=1065532821]
+unique_name_in_owner = true
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 900.0
+script = ExtResource("2_iwahq")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://dtowbocmj476p"
+
+[node name="WelcomeTxt" type="Label" parent="ControlCSS/Page" unique_id=562749881]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 345.6
+offset_top = 180.0
+offset_right = 506.6
+offset_bottom = 214.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_outline_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 29
+text = "¡Bienvenido!"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(30, 20)
+position_unit = 1
+font_size_css = 29
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="DateTxt" type="Label" parent="ControlCSS/Page" unique_id=1461651106]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 645.12
+offset_top = 186.75
+offset_right = 800.12
+offset_bottom = 216.75
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_outline_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 20
+text = "24 de Mayo 2008"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(56, 20.75)
+position_unit = 1
+font_size_css = 20
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="TextureRectCSS" type="TextureRect" parent="ControlCSS/Page/DateTxt" unique_id=938543343]
+layout_mode = 0
+offset_left = 163.0
+offset_top = -10.0
+offset_right = 213.0
+offset_bottom = 40.0
+texture = ExtResource("5_257lx")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5_bk6ph")
+screen_anchor = 5
+css_position = Vector2(-58, 0)
+css_size = Vector2(50, 50)
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Sales" type="Panel" parent="ControlCSS/Page" unique_id=45500236]
+layout_mode = 0
+offset_left = 345.6
+offset_top = 270.0
+offset_right = 840.95996
+offset_bottom = 420.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_h4cya")
+script = ExtResource("3_h4cya")
+css_position = Vector2(30, 30)
+position_unit = 1
+css_size = Vector2(43, 150)
+width_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="LabelCSS" type="Label" parent="ControlCSS/Page/Sales" unique_id=967252825]
+layout_mode = 0
+offset_left = 49.535995
+offset_top = 22.5
+offset_right = 213.536
+offset_bottom = 52.5
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 26
+text = "Ventas del día"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(10, 15)
+position_unit = 1
+font_size_css = 26
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="SalesTxt" type="Label" parent="ControlCSS/Page/Sales" unique_id=903612804]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 49.535995
+offset_top = 75.0
+offset_right = 214.536
+offset_bottom = 117.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_outline_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 37
+text = "$ 25.0121"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(10, 50)
+position_unit = 1
+font_size_css = 37
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="TextureRectCSS" type="TextureRect" parent="ControlCSS/Page/Sales" unique_id=1111832877]
+layout_mode = 0
+offset_left = 345.82397
+offset_top = 25.0
+offset_right = 445.82397
+offset_bottom = 125.0
+texture = ExtResource("5_ysxey")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5_bk6ph")
+screen_anchor = 5
+css_position = Vector2(10, 0)
+position_unit = 1
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Invoices" type="Panel" parent="ControlCSS/Page" unique_id=1194116146]
+layout_mode = 0
+offset_left = 345.6
+offset_top = 450.0
+offset_right = 840.95996
+offset_bottom = 600.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_36nn4")
+script = ExtResource("3_h4cya")
+css_position = Vector2(30, 50)
+position_unit = 1
+css_size = Vector2(43, 150)
+width_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="LabelCSS" type="Label" parent="ControlCSS/Page/Invoices" unique_id=2112447307]
+layout_mode = 0
+offset_left = 49.535995
+offset_top = 22.5
+offset_right = 235.536
+offset_bottom = 52.5
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 26
+text = "Facturas del día"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(10, 15)
+position_unit = 1
+font_size_css = 26
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="InvoicesTxt" type="Label" parent="ControlCSS/Page/Invoices" unique_id=519827157]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 49.535995
+offset_top = 75.0
+offset_right = 149.536
+offset_bottom = 117.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_outline_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 37
+text = "32"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(10, 50)
+position_unit = 1
+font_size_css = 37
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="TextureRectCSS" type="TextureRect" parent="ControlCSS/Page/Invoices" unique_id=1032170402]
+layout_mode = 0
+offset_left = 345.82397
+offset_top = 25.0
+offset_right = 445.82397
+offset_bottom = 125.0
+texture = ExtResource("7_7pekp")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5_bk6ph")
+screen_anchor = 5
+css_position = Vector2(10, 0)
+position_unit = 1
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Products" type="Panel" parent="ControlCSS/Page" unique_id=1681325413]
+layout_mode = 0
+offset_left = 345.6
+offset_top = 630.0
+offset_right = 840.95996
+offset_bottom = 780.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_vbw82")
+script = ExtResource("3_h4cya")
+css_position = Vector2(30, 70)
+position_unit = 1
+css_size = Vector2(43, 150)
+width_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="LabelCSS" type="Label" parent="ControlCSS/Page/Products" unique_id=762914667]
+layout_mode = 0
+offset_left = 49.535995
+offset_top = 22.5
+offset_right = 166.536
+offset_bottom = 52.5
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 26
+text = "Productos"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(10, 15)
+position_unit = 1
+font_size_css = 26
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="ProductsTxt" type="Label" parent="ControlCSS/Page/Products" unique_id=494846970]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 49.535995
+offset_top = 75.0
+offset_right = 149.536
+offset_bottom = 117.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_outline_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_constants/outline_size = 2
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 37
+text = "156"
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+css_position = Vector2(10, 50)
+position_unit = 1
+font_size_css = 37
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="TextureRectCSS" type="TextureRect" parent="ControlCSS/Page/Products" unique_id=1449442166]
+layout_mode = 0
+offset_left = 345.82397
+offset_top = 25.0
+offset_right = 445.82397
+offset_bottom = 125.0
+texture = ExtResource("8_257lx")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5_bk6ph")
+screen_anchor = 5
+css_position = Vector2(10, 0)
+position_unit = 1
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="LoadingCircle" type="TextureRect" parent="ControlCSS" unique_id=992386457]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0.47682333, 0.44514596, 0.3740858, 1)
+layout_mode = 0
+offset_left = 526.0
+offset_top = 300.0
+offset_right = 626.0
+offset_bottom = 400.0
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("9_257lx")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("5_bk6ph")
+screen_anchor = 4
+css_position = Vector2(0, -100)
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="LoadingCircleAnim" type="AnimationPlayer" parent="ControlCSS/LoadingCircle" unique_id=952436111]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_36nn4")
+
+[node name="ErrorTxt" type="Label" parent="ControlCSS" unique_id=635439516]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_top = 326.39
+offset_right = 1152.0
+offset_bottom = 361.39
+theme_override_colors/font_color = Color(1, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_257lx")
+theme_override_font_sizes/font_size = 30
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("4_vasrq")
+screen_anchor = 4
+css_position = Vector2(0, -11.79)
+position_unit = 1
+width_unit = 1
+font_size_css = 30
+text_align_css = 1
+metadata/_custom_type_script = "uid://j0wxshqcovmo"

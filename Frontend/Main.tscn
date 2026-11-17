@@ -1,0 +1,576 @@
+[gd_scene format=3 uid="uid://cpif5j7tsme38"]
+
+[ext_resource type="Script" uid="uid://cs15n82h4idfa" path="res://main.gd" id="1_wkp8b"]
+[ext_resource type="Script" uid="uid://cq71cporo46lc" path="res://CSS/PanelCSS.gd" id="2_uu6xs"]
+[ext_resource type="Texture2D" uid="uid://clef846lhiwqo" path="res://Assets/nube.png" id="3_fos0i"]
+[ext_resource type="Script" uid="uid://j0wxshqcovmo" path="res://CSS/LabelCSS.gd" id="3_r0du0"]
+[ext_resource type="Script" uid="uid://e0687jlh8o6u" path="res://CSS/TextureRectCSS.gd" id="4_3dxm6"]
+[ext_resource type="Texture2D" uid="uid://ciwgyi15edl8x" path="res://Assets/logo_bear.png" id="5_3dxm6"]
+[ext_resource type="Texture2D" uid="uid://cfo7y3qiskcu8" path="res://Assets/ic_user.png" id="7_lgr22"]
+[ext_resource type="Script" uid="uid://bm2fkq62p4pni" path="res://CSS/LineEditCSS.gd" id="8_trn2v"]
+[ext_resource type="Texture2D" uid="uid://cifw818ox1sps" path="res://Assets/ic_lock.png" id="9_wkp8b"]
+[ext_resource type="Script" uid="uid://bcan6eune6gw3" path="res://CSS/ButtonCSS.gd" id="10_20pc6"]
+[ext_resource type="Script" uid="uid://cq0hteqdr1fh4" path="res://CSS/TextureButtonCSS.gd" id="10_c2ibq"]
+[ext_resource type="Texture2D" uid="uid://dstomoxg7sm45" path="res://Assets/oso_peluche.png" id="10_c6i3y"]
+[ext_resource type="Texture2D" uid="uid://cvd6cimbhhtu8" path="res://Assets/loading_circle.png" id="11_20pc6"]
+[ext_resource type="Texture2D" uid="uid://cpke7vxijnwju" path="res://Assets/anillos.png" id="11_c2ibq"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_r0du0"]
+bg_color = Color(1, 0.9764706, 0.9254902, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_uu6xs"]
+bg_color = Color(1, 1, 0.972549, 1)
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 15
+corner_radius_top_right = 15
+corner_radius_bottom_right = 15
+corner_radius_bottom_left = 15
+
+[sub_resource type="SystemFont" id="SystemFont_0bcne"]
+font_names = PackedStringArray("Cursive")
+font_italic = true
+
+[sub_resource type="SystemFont" id="SystemFont_lgr22"]
+font_names = PackedStringArray("Sans-Serif")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_0bcne"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.8980392, 0.88235295, 0.84705883, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 13
+corner_radius_bottom_right = 13
+corner_radius_bottom_left = 12
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_c2ibq"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_j4qnp"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.95, 0.95, 0.95, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_fpfj3"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_sc1dx"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_kjvhd"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(0.95, 0.95, 0.95, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5tuhn"]
+content_margin_left = 8.0
+content_margin_top = 4.0
+content_margin_right = 8.0
+content_margin_bottom = 4.0
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[sub_resource type="CompressedTexture2D" id="CompressedTexture2D_j4qnp"]
+load_path = "res://.godot/imported/open_eye.png-1b9d9def2bf1a5f20f92c2e66aac553b.ctex"
+
+[sub_resource type="SystemFont" id="SystemFont_vortj"]
+font_names = PackedStringArray("Sans-Serif")
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_2gh4u"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.7254902, 0.627451, 0.84313726, 1)
+border_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_devvj"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.4410051, 0.32252064, 0.5681884, 1)
+border_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_3b0ty"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.7254902, 0.627451, 0.84313726, 1)
+border_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_bg4s2"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(0.14509805, 0.14509805, 0.14509805, 1)
+border_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hhcpw"]
+content_margin_left = 0.0
+content_margin_top = 0.0
+content_margin_right = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 0)
+border_color = Color(1, 1, 1, 0)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="Animation" id="Animation_5vvyt"]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.0]
+}
+
+[sub_resource type="Animation" id="Animation_c6i3y"]
+resource_name = "rotate"
+loop_mode = 1
+tracks/0/type = "value"
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/path = NodePath(".:rotation")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/keys = {
+"times": PackedFloat32Array(0, 1),
+"transitions": PackedFloat32Array(1, 1),
+"update": 0,
+"values": [0.0, 6.2831855]
+}
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_c2ibq"]
+_data = {
+&"RESET": SubResource("Animation_5vvyt"),
+&"rotate": SubResource("Animation_c6i3y")
+}
+
+[node name="Main" type="Control" unique_id=1921245091]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+script = ExtResource("1_wkp8b")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://dtowbocmj476p"
+
+[node name="Bg" type="Panel" parent="." unique_id=1224667933]
+layout_mode = 0
+offset_right = 1152.0
+offset_bottom = 648.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_r0du0")
+script = ExtResource("2_uu6xs")
+width_unit = 1
+height_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="LoginCard" type="Panel" parent="." unique_id=1539988696]
+layout_mode = 0
+offset_left = 376.0
+offset_top = 74.0
+offset_right = 776.0
+offset_bottom = 574.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_uu6xs")
+script = ExtResource("2_uu6xs")
+screen_anchor = 4
+css_size = Vector2(400, 500)
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="Cloud" type="TextureRect" parent="LoginCard" unique_id=1825629401]
+layout_mode = 0
+offset_left = 290.0
+offset_top = -40.0
+offset_right = 490.0
+offset_bottom = 110.0
+texture = ExtResource("3_fos0i")
+expand_mode = 1
+stretch_mode = 4
+script = ExtResource("4_3dxm6")
+screen_anchor = 2
+css_position = Vector2(-90, -40)
+css_size = Vector2(200, 150)
+object_fit = 4
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Logo" type="TextureRect" parent="LoginCard" unique_id=401696591]
+layout_mode = 0
+offset_left = 150.0
+offset_top = 20.0
+offset_right = 250.0
+offset_bottom = 120.0
+texture = ExtResource("5_3dxm6")
+expand_mode = 1
+stretch_mode = 4
+script = ExtResource("4_3dxm6")
+screen_anchor = 1
+css_position = Vector2(0, 20)
+object_fit = 4
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Title" type="Label" parent="LoginCard" unique_id=1518062861]
+layout_mode = 0
+offset_top = 140.0
+offset_right = 400.0
+offset_bottom = 176.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_0bcne")
+theme_override_font_sizes/font_size = 25
+text = "JUGUETERIA"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("3_r0du0")
+screen_anchor = 1
+css_position = Vector2(0, 140)
+width_unit = 1
+font_size_css = 25
+text_align_css = 1
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="Title2" type="Label" parent="LoginCard" unique_id=1984753296]
+layout_mode = 0
+offset_top = 180.0
+offset_right = 400.0
+offset_bottom = 210.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_lgr22")
+theme_override_font_sizes/font_size = 16
+text = "Sistema de Facturación"
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("3_r0du0")
+screen_anchor = 1
+css_position = Vector2(0, 180)
+width_unit = 1
+text_align_css = 1
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="User" type="Panel" parent="LoginCard" unique_id=351572954]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 240.0
+offset_right = 370.0
+offset_bottom = 300.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_0bcne")
+script = ExtResource("2_uu6xs")
+screen_anchor = 4
+css_position = Vector2(0, 20)
+css_size = Vector2(85, 60)
+width_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="ic" type="TextureRect" parent="LoginCard/User" unique_id=619604834]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 14.0
+offset_right = 52.0
+offset_bottom = 46.0
+texture = ExtResource("7_lgr22")
+expand_mode = 1
+stretch_mode = 4
+script = ExtResource("4_3dxm6")
+screen_anchor = 3
+css_position = Vector2(20, 0)
+css_size = Vector2(32, 32)
+object_fit = 4
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="User" type="LineEdit" parent="LoginCard/User" unique_id=1560894922]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 60.0
+offset_top = 10.0
+offset_right = 315.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_placeholder_color = Color(0.74509805, 0.74509805, 0.74509805, 1)
+theme_override_styles/normal = SubResource("StyleBoxFlat_c2ibq")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_j4qnp")
+theme_override_styles/focus = SubResource("StyleBoxFlat_fpfj3")
+placeholder_text = "Usuario"
+script = ExtResource("8_trn2v")
+css_position = Vector2(60, 10)
+css_size = Vector2(75, 40)
+css_width_unit = 1
+css_text_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+css_border_color = Color(1, 1, 1, 1)
+css_focus_border_color = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bm2fkq62p4pni"
+
+[node name="Password" type="Panel" parent="LoginCard" unique_id=1858846945]
+layout_mode = 0
+offset_left = 30.0
+offset_top = 310.0
+offset_right = 370.0
+offset_bottom = 370.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_0bcne")
+script = ExtResource("2_uu6xs")
+screen_anchor = 4
+css_position = Vector2(0, 90)
+css_size = Vector2(85, 60)
+width_unit = 1
+metadata/_custom_type_script = "uid://cq71cporo46lc"
+
+[node name="ic" type="TextureRect" parent="LoginCard/Password" unique_id=1907858992]
+layout_mode = 0
+offset_left = 20.0
+offset_top = 14.0
+offset_right = 52.0
+offset_bottom = 46.0
+texture = ExtResource("9_wkp8b")
+expand_mode = 1
+stretch_mode = 4
+script = ExtResource("4_3dxm6")
+screen_anchor = 3
+css_position = Vector2(20, 0)
+css_size = Vector2(32, 32)
+object_fit = 4
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Password" type="LineEdit" parent="LoginCard/Password" unique_id=1592520884]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 60.0
+offset_top = 10.0
+offset_right = 264.0
+offset_bottom = 50.0
+theme_override_colors/font_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+theme_override_colors/font_placeholder_color = Color(0.74509805, 0.74509805, 0.74509805, 1)
+theme_override_colors/selection_color = Color(0.25, 0.5, 1, 0.5)
+theme_override_font_sizes/font_size = 16
+theme_override_styles/normal = SubResource("StyleBoxFlat_sc1dx")
+theme_override_styles/read_only = SubResource("StyleBoxFlat_kjvhd")
+theme_override_styles/focus = SubResource("StyleBoxFlat_5tuhn")
+placeholder_text = "Contraseña"
+secret = true
+script = ExtResource("8_trn2v")
+css_position = Vector2(60, 10)
+css_size = Vector2(60, 40)
+css_width_unit = 1
+css_text_color = Color(0.15294118, 0.20392157, 0.2901961, 1)
+css_border_color = Color(1, 1, 1, 1)
+css_focus_border_color = Color(1, 1, 1, 1)
+metadata/_custom_type_script = "uid://bm2fkq62p4pni"
+
+[node name="ViewPasswordBtn" type="TextureButton" parent="LoginCard/Password" unique_id=1037592152]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 265.0
+offset_top = 5.0
+offset_right = 340.0
+offset_bottom = 55.0
+texture_normal = SubResource("CompressedTexture2D_j4qnp")
+texture_pressed = SubResource("CompressedTexture2D_j4qnp")
+texture_hover = SubResource("CompressedTexture2D_j4qnp")
+ignore_texture_size = true
+stretch_mode = 5
+script = ExtResource("10_c2ibq")
+screen_anchor = 5
+css_size = Vector2(75, 50)
+metadata/_custom_type_script = "uid://cq0hteqdr1fh4"
+
+[node name="ErrorTxt" type="Label" parent="LoginCard" unique_id=775419976]
+unique_name_in_owner = true
+layout_mode = 0
+offset_top = 390.0
+offset_right = 400.0
+offset_bottom = 420.0
+theme_override_colors/font_color = Color(1, 0.20392157, 0.2901961, 1)
+theme_override_fonts/font = SubResource("SystemFont_lgr22")
+theme_override_font_sizes/font_size = 16
+horizontal_alignment = 1
+vertical_alignment = 1
+script = ExtResource("3_r0du0")
+screen_anchor = 7
+css_position = Vector2(0, 80)
+width_unit = 1
+text_align_css = 1
+metadata/_custom_type_script = "uid://j0wxshqcovmo"
+
+[node name="Logo2" type="TextureRect" parent="LoginCard" unique_id=834553123]
+layout_mode = 0
+offset_left = -20.0
+offset_top = 380.0
+offset_right = 130.0
+offset_bottom = 480.0
+texture = ExtResource("10_c6i3y")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_3dxm6")
+screen_anchor = 6
+css_position = Vector2(-20, 20)
+css_size = Vector2(150, 100)
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="Logo3" type="TextureRect" parent="LoginCard" unique_id=87088101]
+layout_mode = 0
+offset_left = 270.0
+offset_top = 380.0
+offset_right = 420.0
+offset_bottom = 480.0
+texture = ExtResource("11_c2ibq")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_3dxm6")
+screen_anchor = 8
+css_position = Vector2(-20, 20)
+css_size = Vector2(150, 100)
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="LoginBtn" type="Button" parent="LoginCard" unique_id=35044519]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 100.0
+offset_top = 430.0
+offset_right = 300.0
+offset_bottom = 480.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_colors/font_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/font_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/font_disabled_color = Color(0.74509805, 0.74509805, 0.74509805, 1)
+theme_override_fonts/font = SubResource("SystemFont_vortj")
+theme_override_font_sizes/font_size = 14
+theme_override_styles/normal = SubResource("StyleBoxFlat_2gh4u")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_devvj")
+theme_override_styles/hover = SubResource("StyleBoxFlat_3b0ty")
+theme_override_styles/disabled = SubResource("StyleBoxFlat_bg4s2")
+theme_override_styles/focus = SubResource("StyleBoxFlat_hhcpw")
+text = "INICIAR SESIÓN"
+script = ExtResource("10_20pc6")
+screen_anchor = 7
+css_position = Vector2(0, 20)
+css_size = Vector2(200, 50)
+font_size_css = 14
+background_color_css = Color(0.7254902, 0.627451, 0.84313726, 1)
+hover_color_css = Color(0.7254902, 0.627451, 0.84313726, 1)
+pressed_color_css = Color(0.4410051, 0.32252064, 0.5681884, 1)
+metadata/_custom_type_script = "uid://bcan6eune6gw3"
+
+[node name="LoadingCircle" type="TextureRect" parent="LoginCard" unique_id=992564601]
+unique_name_in_owner = true
+visible = false
+modulate = Color(0.8980392, 0.88235295, 0.84705883, 1)
+layout_mode = 0
+offset_left = 175.0
+offset_top = 410.0
+offset_right = 225.0
+offset_bottom = 460.0
+pivot_offset_ratio = Vector2(0.5, 0.5)
+texture = ExtResource("11_20pc6")
+expand_mode = 1
+stretch_mode = 5
+script = ExtResource("4_3dxm6")
+screen_anchor = 7
+css_position = Vector2(0, 40)
+css_size = Vector2(50, 50)
+object_fit = 5
+metadata/_custom_type_script = "uid://e0687jlh8o6u"
+
+[node name="LoadingCircleAnim" type="AnimationPlayer" parent="LoginCard/LoadingCircle" unique_id=589965896]
+unique_name_in_owner = true
+libraries/ = SubResource("AnimationLibrary_c2ibq")
+
+[connection signal="text_submitted" from="LoginCard/Password/Password" to="." method="_on_password_text_submitted"]
+[connection signal="pressed" from="LoginCard/Password/ViewPasswordBtn" to="." method="_on_view_password_btn_pressed"]
+[connection signal="pressed" from="LoginCard/LoginBtn" to="." method="_on_login_btn_pressed"]
