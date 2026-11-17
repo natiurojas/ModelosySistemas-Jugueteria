@@ -37,7 +37,12 @@ Desde la pantalla de ventas, el botón **Cargar por código de barras** abre `Ba
 - `GET /api/productos/por-codigo/<codigo>/` busca por código de barras.
 - `POST /api/productos/`, `PATCH /api/productos/<id>/`, `DELETE /api/productos/<id>/` administran productos con token y permisos.
 - `POST /api/ventas/` registra factura y detalle en `facturas` y `factura_detalle`, descuenta stock en una transacción.
-- `GET /api/ventas/` y `GET /api/ventas/<id>/` consultan las facturas.
+- `GET /api/ventas/` consulta las facturas (máximo 500). Filtros opcionales por período (hora Argentina):
+  - `periodo=dia` + `fecha=YYYY-MM-DD`
+  - `periodo=mes` + `mes=YYYY-MM`
+  - `periodo=anio` + `anio=YYYY`
+  - Responde con el array de facturas y el header `X-Total-Count`. Períodos inválidos → `400`.
+- `GET /api/ventas/<id>/` consulta una factura.
 - `/api/admin/usuarios/`, `/api/admin/sucursales/` y `/api/admin/cajas/` gestionan el panel administrativo.
 
 La app Android usa `Token <token>` en el encabezado Authorization. El inicio de sesión Google/Firebase fue deshabilitado: la autenticación para esta versión se hace con usuarios de Django.

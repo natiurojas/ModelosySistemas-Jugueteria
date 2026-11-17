@@ -141,10 +141,11 @@ class InvoicesActivity : AppCompatActivity() {
         setupNavigation()
 
         // =================================
-        // CARGAR FACTURAS
+        // FILTROS Y CARGA INICIAL
         // =================================
 
-        cargarFacturas()
+        setupFilters()
+        // La carga la hace onResume (se ejecuta justo después de onCreate).
 
         // =================================
         // NUEVA VENTA
@@ -259,9 +260,81 @@ class InvoicesActivity : AppCompatActivity() {
     // CARGAR FACTURAS DESDE FIRESTORE
     // =====================================
 
+    private fun setupFilters() {
+
+        txtSelectedPeriod = findViewById(R.id.txtSelectedPeriod)
+        btnPickDate = findViewById(R.id.btnPickDate)
+
+        findViewById<Button>(R.id.btnFilterDay).setOnClickListener { setPeriod("dia") }
+        findViewById<Button>(R.id.btnFilterMonth).setOnClickListener { setPeriod("mes") }
+        findViewById<Button>(R.id.btnFilterYear).setOnClickListener { setPeriod("anio") }
+        findViewById<Button>(R.id.btnFilterAll).setOnClickListener { setPeriod(null) }
+        btnPickDate.setOnClickListener { showDatePicker() }
+    }
+
+    private fun setPeriod(period: String?) {
+
+        salesPeriod = period
+        if (period == null) {
+            salesFilterValue = null
+            txtSelectedPeriod.text = "Sin filtro"
+            btnPickDate.visibility = View.GONE
+        } else {
+            val today = LocalDate.now()
+            salesFilterValue = when (period) {
+                "dia" -> today.toString()
+                "mes" -> YearMonth.from(today).toString()
+                else -> today.year.toString()
+            }
+            updatePeriodLabel()
+            btnPickDate.visibility = View.VISIBLE
+        }
+        cargarFacturas()
+    }
+
+    private fun updatePeriodLabel() {
+        val value = salesFilterValue ?: return
+        txtSelectedPeriod.text = when (salesPeriod) {
+            "dia" -> "Día: " + LocalDate.parse(value).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"))
+            "mes" -> "Mes: " + YearMonth.parse(value).format(DateTimeFormatter.ofPattern("MM/yyyy"))
+            "anio" -> "Año: $value"
+            else -> "Sin filtro"
+        }
+    }
+
+    private fun showDatePicker() {
+        val initial = when (salesPeriod) {
+            "dia" -> salesFilterValue?.let { LocalDate.parse(it) } ?: LocalDate.now()
+            "mes" -> salesFilterValue?.let { YearMonth.parse(it).atDay(1) } ?: LocalDate.now().withDayOfMonth(1)
+            "anio" -> salesFilterValue?.let { LocalDate.of(it.toInt(), 1, 1) } ?: LocalDate.now().withDayOfYear(1)
+            else -> LocalDate.now()
+        }
+        DatePickerDialog(
+            this,
+            { _, year, month, dayOfMonth ->
+                val date = LocalDate.of(year, month + 1, dayOfMonth)
+                salesFilterValue = when (salesPeriod) {
+                    "dia" -> date.toString()
+                    "mes" -> YearMonth.from(date).toString()
+                    "anio" -> date.year.toString()
+                    else -> null
+                }
+                updatePeriodLabel()
+                cargarFacturas()
+            },
+            initial.year,
+            initial.monthValue - 1,
+            initial.dayOfMonth
+        ).show()
+    }
+
     private fun cargarFacturas() {
 
-        backend.getSales { sales, error ->
+        val requestId = ++salesRequestId
+
+        backend.getSalesFiltered(salesPeriod, salesFilterValue) { sales, error ->
+
+            if (requestId != salesRequestId) return@getSalesFiltered
 
             if (error != null) {
 
@@ -271,7 +344,7 @@ class InvoicesActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
 
-                return@getSales
+                return@getSalesFiltered
             }
 
             adapter.updateList(
