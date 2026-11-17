@@ -7,6 +7,9 @@ import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class InvoiceViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
@@ -60,7 +63,8 @@ class InvoiceAdapter(
 
 
         holder.date.text =
-            sale.date.toString()
+            if (sale.date > 0) SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(Date(sale.date))
+            else "Fecha no disponible"
 
 
         holder.total.text =

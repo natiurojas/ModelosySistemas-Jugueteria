@@ -1,5 +1,6 @@
 package com.example.jugueteria
 
+import android.app.DatePickerDialog
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
@@ -8,6 +9,9 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -22,6 +26,12 @@ class InvoicesActivity : AppCompatActivity() {
     private lateinit var adapter: InvoiceAdapter
 
     private lateinit var backend: DjangoRepository
+
+    private lateinit var txtSelectedPeriod: TextView
+    private lateinit var btnPickDate: Button
+    private var salesPeriod: String? = null
+    private var salesFilterValue: String? = null
+    private var salesRequestId = 0
 
     // =================================
     // NAVEGACIÓN
