@@ -184,8 +184,17 @@ func eliminar_producto(id: int) -> Dictionary:
 # VENTAS
 # -----------------------------------------------------------------------------
 
-func get_ventas() -> Dictionary:
-	return await get_endpoint("/api/ventas/")
+func get_ventas(periodo: String = "", fecha: String = "", mes: String = "", anio: String = "") -> Dictionary:
+	var query := {}
+	if not periodo.is_empty():
+		query["periodo"] = periodo
+	if not fecha.is_empty():
+		query["fecha"] = fecha
+	if not mes.is_empty():
+		query["mes"] = mes
+	if not anio.is_empty():
+		query["anio"] = anio
+	return await get_endpoint("/api/ventas/", query)
 
 func get_venta(id: int) -> Dictionary:
 	return await get_endpoint("/api/ventas/%d/" % id)
