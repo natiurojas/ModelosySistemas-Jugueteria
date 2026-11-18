@@ -305,10 +305,13 @@ class InvoicesActivity : AppCompatActivity() {
         }
     }
 
-    private fun formatDate(value: String, from: String, to: String): String = try {
-        SimpleDateFormat(to, Locale.US).format(SimpleDateFormat(from, Locale.US).parse(value))
-    } catch (_: Exception) {
-        value
+    private fun formatDate(value: String, from: String, to: String): String {
+        val parsed = try {
+            SimpleDateFormat(from, Locale.US).parse(value)
+        } catch (_: Exception) {
+            null
+        }
+        return parsed?.let { SimpleDateFormat(to, Locale.US).format(it) } ?: value
     }
 
     private fun showDatePicker() {
